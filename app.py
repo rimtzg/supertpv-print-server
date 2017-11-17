@@ -29,12 +29,6 @@ def MakeJson(cursor):
 
 @app.before_first_request
 def first_start():
-    #z = threading.Thread(target=get_updated_products)
-    #z.start()
-    #z = threading.Thread(target=get_updated_promotions)
-    #z.start()
-    #z = threading.Thread(target=get_updated_categories)
-    #z.start()
     pass
 
 ########################################################################
@@ -71,8 +65,6 @@ def pageInternalServerError(error):
 
 @app.route('/')
 def main():
-    #z = threading.Thread(target=worker)
-    #z.start()
     return MakeJson({"ok" : "Hola Mundo"})
 
 ########################################################################
