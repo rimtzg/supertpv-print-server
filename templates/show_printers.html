@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Printers</h2>
+  {% if session.logged_in %}
+  <h3>Add a new printer</h3>
+    <form action="{{ url_for('add_printer') }}" method=POST class=add-printer>
+      <dl>
+        <dt>Name:
+        <dd><input type=text size=40 name=name>
+        <dt>Route:
+        <dd><input type=text size=40 name=route>
+        <dt>Chars:
+        <dd><input type=number size=2 name=chars>
+        <dd><input type=submit value=Add>
+      </dl>
+    </form>
+  {% endif %}
+  <ul class=printers>
+  {% for printer in printers %}
+      <form action="{{ url_for('delete_printer') }}" method=POST class=delete-printer>
+        <dt><h3>{{ printer.name }}</h3>
+        <dt>Route: {{ printer.route }}
+        <dt>Chars: {{ printer.chars }}
+        <dt><input type=hidden name=id value={{ printer.id }}>
+        {% if session.logged_in %}
+        <dt><input type=submit value=Delete>
+        {% endif %}
+      </form>
+      <br>
+  {% else %}
+    <em>Unbelievable.  No printers here so far</em>
+  {% endfor %}
+  </ul>
+{% endblock %}
