@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h2>Templates</h2>
+    {% if session.logged_in %}
+    <h3>Add a new template</h3>
+    <form action="{{ url_for('add_template') }}" method=POST class=add>
+      <dl>
+        <dt>Name:
+        <dd><input type=text size=40 name=name>
+        <dt>URL:
+        <dd><input type=text size=40 name=url>
+        <dt>Text:
+        <dd><textarea rows=5 cols=40 name=text></textarea>
+        <dd><input type=submit value=Add>
+      </dl>
+    </form>
+    {% endif %}
+    {% for template in templates %}
+        <form action="{{ url_for('save_template') }}" method=POST class=template>
+            <dt><h3>{{ template.name }}</h3>
+            <dt>URL:
+            <dd>
+              {% if session.logged_in %}
+              <input type=text name=url value={{ template.url }}>
+              {% else %}
+                {{ template.url }}
+              {% endif %}
+            <dt>Text:
+            <dd>
+              {% if session.logged_in %}
+              <textarea rows=5 cols=40 name=text>{{ template.text }}</textarea>
+              {% else %}
+                {{ template.text }}
+              {% endif %}
+            <dt><input type=hidden name=id value={{ template.id }}>
+            {% if session.logged_in %}
+            <dt><input type=submit value=Save>
+            {% endif %}
+        </form>
+        {% if session.logged_in %}
+        <form action="{{ url_for('delete_template') }}" method=POST class=template>
+            <dt><input type=hidden name=id value={{ template.id }}>
+            <dt><input type=submit value=Delete>
+        </form>
+        {% endif %}
+      <br />
+    {% else %}
+        <em>Unbelievable.  No templates here so far</em>
+    {% endfor %}
+{% endblock %}

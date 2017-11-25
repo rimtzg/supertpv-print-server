@@ -3,7 +3,7 @@
 <h2>Printers</h2>
   {% if session.logged_in %}
   <h3>Add a new printer</h3>
-    <form action="{{ url_for('add_printer') }}" method=POST class=add-printer>
+    <form action="{{ url_for('add_printer') }}" method=POST class=add>
       <dl>
         <dt>Name:
         <dd><input type=text size=40 name=name>
@@ -15,20 +15,36 @@
       </dl>
     </form>
   {% endif %}
-  <ul class=printers>
   {% for printer in printers %}
-      <form action="{{ url_for('delete_printer') }}" method=POST class=delete-printer>
+      <form action="{{ url_for('save_printer') }}" method=POST class=printer>
         <dt><h3>{{ printer.name }}</h3>
-        <dt>Route: {{ printer.route }}
-        <dt>Chars: {{ printer.chars }}
+        <dt>Route:
+        <dd>
+          {% if session.logged_in %}
+            <input type=text name=route value={{ printer.route }}>
+          {% else %}
+            {{ printer.route }}
+          {% endif %}
+        <dt>Chars:
+        <dd>
+          {% if session.logged_in %}
+            <input type=text name=chars value={{ printer.chars }}>
+          {% else %}
+            {{ printer.chars }}
+          {% endif %}
         <dt><input type=hidden name=id value={{ printer.id }}>
         {% if session.logged_in %}
-        <dt><input type=submit value=Delete>
+        <dt><input type=submit value=Save>
         {% endif %}
       </form>
+      {% if session.logged_in %}
+      <form action="{{ url_for('delete_printer') }}" method=POST class=printer>
+        <dt><input type=hidden name=id value={{ printer.id }}>
+        <dt><input type=submit value=Delete>
+      </form>
+      {% endif %}
       <br>
   {% else %}
     <em>Unbelievable.  No printers here so far</em>
   {% endfor %}
-  </ul>
 {% endblock %}
