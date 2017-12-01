@@ -1,4 +1,4 @@
-from setuptools import setup
+from distutils.core import setup
 
 NAME = "supertpv-print-server"
 VERSION = "0.1dev"
@@ -13,7 +13,17 @@ setup(name = NAME,
       author = AUTHOR,
       author_email = EMAIL,
       url = URL,
+      include_package_data=True,
       packages = ['supertpv-print-server',
       'supertpv-print-server.templates',
       'supertpv-print-server.static'],
+      license='LICENSE.txt',
+      long_description=open('README.txt').read(),
+      install_requires=[
+        "Flask",
+        "flask_httpauth",
+        "gunicorn",
+        "pymongo",
+        "python-escpos",
+    ],
 )
