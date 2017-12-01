@@ -28,7 +28,7 @@
             <dt>Text:
             <dd>
               {% if session.logged_in %}
-              <textarea rows=5 cols=40 name=text>{{ template.text }}</textarea>
+              <textarea rows=50 cols=140 name=text>{{ template.text }}</textarea>
               {% else %}
                 {{ template.text }}
               {% endif %}

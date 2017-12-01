@@ -3,7 +3,9 @@ from flask_httpauth import HTTPBasicAuth
 from bson.json_util import dumps, loads
 import sqlite3
 from jinja2 import Template
+import json
 
+from parser import TagParser
 #from config import Config
 #from database import Driver
 
@@ -113,12 +115,7 @@ def main():
 
 @app.route('/test')
 def test():
-    db = get_db()
-    cur = db.execute('select * from templates order by id desc limit 1')
-    result = cur.fetchone()
-    template = Template(result["text"])
-    text = template.render(name='John Doe')
-    return text
+    pass
 
 ########################################################################
 #                                                                      #
@@ -145,6 +142,31 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('main'))
+
+########################################################################
+#                                                                      #
+#                                 PRINT                                #
+#                                                                      #
+########################################################################
+
+@app.route('/print/<template_url>', methods=['POST'])
+def print(template_url):
+    data = MakeBson(request.json)
+    if(data):
+        db = get_db()
+        cur = db.execute('select * from templates where url=? order by id desc limit 1', [template_url])
+        result = cur.fetchone()
+
+        if(result):
+            template = Template(result["text"])
+            parser = TagParser()
+            text = template.render(data)
+            print( parser.feed(text) )
+            return text
+        else:
+            return MakeJson({"error": "The template "+str(template_url)+" does not exist"})
+    else:
+        return MakeJson({"error": "None data was recibed"})
 
 ########################################################################
 #                                                                      #
