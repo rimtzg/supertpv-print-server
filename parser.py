@@ -92,8 +92,15 @@ class TagParser(HTMLParser):
         if(tag == "text"):
             Printer.text("\n")
 
-    def handle_data(self, data):
-        text = data.replace("\n", "")
+    def handle_data(self, text):
+        text = text.replace("\n", "")
+        text = text.replace("ñ", "n")
+        text = text.replace("á", "a")
+        text = text.replace("é", "e")
+        text = text.replace("í", "i")
+        text = text.replace("ó", "o")
+        text = text.replace("ú", "u")
+        text = text.replace("ü", "u")
         if(len(text) > 0):
             print("Imprimir: ", text)
             Printer.text(text)
