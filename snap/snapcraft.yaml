@@ -11,7 +11,7 @@ apps:
   supertpv-print-server:
     #environment:
       #FLASK_SECRETS: $SNAP_COMMON/flask_secrets.py
-    command: run
+    command: bin/run
     daemon: simple
   # nginx-wrap:
   #   command: wrappers/nginx-wrap
