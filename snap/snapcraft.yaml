@@ -7,11 +7,34 @@ description: |
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
 
-parts:
-  supertpv-print-server:
-    plugin: python
-    source: git://github.com/rimtzg/supertpv-print-server.git
-
 apps:
   supertpv-print-server:
-    command: desktop-launch $SNAP/share/supertpv-print-server/supertpv-print-server.py
+    environment:
+      FLASK_SECRETS: $SNAP_COMMON/flask_secrets.py
+    command: wrappers/supertpv-print-server
+    daemon: simple
+  nginx-wrap:
+    command: wrappers/nginx-wrap
+    daemon: simple
+
+parts:
+  supertpv-print-server:
+    after: [nginx-wrap]
+    plugin: python
+    source: .
+    python-version: python3
+    requirements: requirements.txt
+    stage-packages: [libpq-dev,libssl-dev]
+    install: |
+      mkdir -p $SNAPCRAFT_PART_INSTALL/flask-app
+      cp -r ./* $SNAPCRAFT_PART_INSTALL/flask-app/
+  wrappers:
+    plugin: dump
+    source: snap_wrap/
+  nginx-wrap:
+    plugin: nginx
+    source: .
+    install: |
+      rm $SNAPCRAFT_PART_INSTALL/nginx/conf/nginx.conf.default
+      rm $SNAPCRAFT_PART_INSTALL/nginx/conf/nginx.conf
+      cp ./nginx.conf.snap.template $SNAPCRAFT_PART_INSTALL/nginx/conf/nginx.conf
