@@ -11,7 +11,7 @@ apps:
   supertpv-print-server:
     #environment:
       #FLASK_SECRETS: $SNAP_COMMON/flask_secrets.py
-    command: bin/run
+    command: wrappers/run
     daemon: simple
   # nginx-wrap:
   #   command: wrappers/nginx-wrap
@@ -28,9 +28,9 @@ parts:
     install: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/flask-app
       cp -r ./* $SNAPCRAFT_PART_INSTALL/flask-app/
-  bin:
+  wrappers:
     plugin: dump
-    source: bin/
+    source: wrappers/
   # nginx-wrap:
   #   plugin: nginx
   #   source: .
