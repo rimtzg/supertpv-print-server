@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+export FLASK_APP=$SNAP/flask-app/app.py
+export PYTHONPATH=$SNAP/lib/python3.5/site-packages/
+
+exec "$SNAP/bin/gunicorn" --chdir "$SNAP/flask-app" --bind unix:/tmp/data-api.sock wsgi:app "$@"
