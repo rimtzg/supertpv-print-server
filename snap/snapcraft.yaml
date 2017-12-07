@@ -33,11 +33,11 @@ parts:
     install: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/flask-app
       cp -r ./* $SNAPCRAFT_PART_INSTALL/flask-app/
+    build: |
+      chmod 500 $SNAPCRAFT_PART_INSTALL/wrappers/supertpv-print-server
   wrappers:
     plugin: dump
     source: snap_wrap/
-  build: |
-    chmod 500 $SNAPCRAFT_PART_INSTALL/wrappers/supertpv-print-server
   # nginx-wrap:
   #   plugin: nginx
   #   source: .
