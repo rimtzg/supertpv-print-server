@@ -10,10 +10,8 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 parts:
   supertpv-print-server:
     plugin: python
-    source: .
-    requirements: requirements.txt
+    source: git://github.com/rimtzg/supertpv-print-server.git
 
 apps:
   supertpv-print-server:
-    command: gunicorn wsgi:app
-    daemon: simple
+    command: desktop-launch $SNAP/share/supertpv-print-server/supertpv-print-server.py
