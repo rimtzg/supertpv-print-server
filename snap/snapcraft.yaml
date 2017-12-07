@@ -18,6 +18,9 @@ apps:
   # nginx-wrap:
   #   command: wrappers/nginx-wrap
   #   daemon: simple
+  daemon:
+    command: wrappers/supertpv-print-server
+    daemon: simple
 
 parts:
   supertpv-print-server:
@@ -33,6 +36,8 @@ parts:
   wrappers:
     plugin: dump
     source: snap_wrap/
+  build: |
+    chmod 500 $SNAPCRAFT_PART_INSTALL/wrappers/supertpv-print-server
   # nginx-wrap:
   #   plugin: nginx
   #   source: .
