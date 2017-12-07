@@ -13,9 +13,9 @@ apps:
       FLASK_SECRETS: $SNAP_COMMON/flask_secrets.py
     command: wrappers/supertpv-print-server
     daemon: simple
-  nginx-wrap:
-    command: wrappers/nginx-wrap
-    daemon: simple
+  # nginx-wrap:
+  #   command: wrappers/nginx-wrap
+  #   daemon: simple
 
 parts:
   supertpv-print-server:
@@ -31,10 +31,10 @@ parts:
   wrappers:
     plugin: dump
     source: snap_wrap/
-  nginx-wrap:
-    plugin: nginx
-    source: .
-    install: |
-      rm $SNAPCRAFT_PART_INSTALL/nginx/conf/nginx.conf.default
-      rm $SNAPCRAFT_PART_INSTALL/nginx/conf/nginx.conf
-      cp ./nginx.conf.snap.template $SNAPCRAFT_PART_INSTALL/nginx/conf/nginx.conf
+  # nginx-wrap:
+  #   plugin: nginx
+  #   source: .
+  #   install: |
+  #     rm $SNAPCRAFT_PART_INSTALL/nginx/conf/nginx.conf.default
+  #     rm $SNAPCRAFT_PART_INSTALL/nginx/conf/nginx.conf
+  #     cp ./nginx.conf.snap.template $SNAPCRAFT_PART_INSTALL/nginx/conf/nginx.conf
