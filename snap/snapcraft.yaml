@@ -19,7 +19,7 @@ apps:
 
 parts:
   supertpv-print-server:
-    after: [nginx-wrap]
+#    after: [nginx-wrap]
     plugin: python
     source: .
     python-version: python3
