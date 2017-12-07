@@ -7,14 +7,14 @@ description: |
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
 
-architectures: amd64, i386
+architectures: [amd64, i386]
 
 apps:
   supertpv-print-server:
     #environment:
-      #FLASK_SECRETS: $SNAP_COMMON/flask_secrets.py
+    #  FLASK_SECRETS: $SNAP_COMMON/flask_secrets.py
     command: wrappers/supertpv-print-server
-    daemon: simple
+    #daemon: simple
   # nginx-wrap:
   #   command: wrappers/nginx-wrap
   #   daemon: simple
