@@ -30,7 +30,7 @@ parts:
       cp -r ./* $SNAPCRAFT_PART_INSTALL/flask-app/
   wrappers:
     plugin: dump
-    source: wrappers/
+    source: snap_wrap/
   # nginx-wrap:
   #   plugin: nginx
   #   source: .
