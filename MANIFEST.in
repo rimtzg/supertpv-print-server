@@ -1,5 +1,5 @@
 include *.txt
 recursive-include docs *.txt
-recursive-include supertpv-print-server/schemas *
-recursive-include supertpv-print-server/templates *
-recursive-include supertpv-print-server/static *
+include supertpv_print_server/schemas.sql
+recursive-include supertpv_print_server/templates *
+recursive-include supertpv_print_server/static *

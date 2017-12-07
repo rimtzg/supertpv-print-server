@@ -11,7 +11,6 @@ parts:
   supertpv-print-server:
     plugin: python
     source: .
-    python-version: python3
     requirements: requirements.txt
 
 apps:
