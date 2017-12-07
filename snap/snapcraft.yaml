@@ -28,9 +28,9 @@ parts:
     install: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/flask-app
       cp -r ./* $SNAPCRAFT_PART_INSTALL/flask-app/
-  #wrappers:
-  #  plugin: dump
-  #  source: snap_wrap/
+  bin:
+    plugin: dump
+    source: bin/
   # nginx-wrap:
   #   plugin: nginx
   #   source: .
