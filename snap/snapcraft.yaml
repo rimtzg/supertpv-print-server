@@ -8,10 +8,10 @@ grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
 
 apps:
-  run:
+  supertpv-print-server:
     #environment:
       #FLASK_SECRETS: $SNAP_COMMON/flask_secrets.py
-    command: wrappers/run
+    command: wrappers/supertpv-print-server
     daemon: simple
   # nginx-wrap:
   #   command: wrappers/nginx-wrap
