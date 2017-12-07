@@ -5,7 +5,7 @@ import sqlite3
 from jinja2 import Template
 import json
 
-from application.parser import TagParser
+from parser import TagParser
 #from config import Config
 #from database import Driver
 
