@@ -4,6 +4,7 @@ from bson.json_util import dumps, loads
 import sqlite3
 from jinja2 import Template
 import json
+import os
 
 from parser import TagParser
 
@@ -39,7 +40,7 @@ def close_db(error):
 
 def init_db():
     db = get_db()
-    with app.open_resource('schema.sql', mode='r') as f:
+    with app.open_resource('schemas.sql', mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
@@ -67,7 +68,8 @@ def MakeJson(cursor):
 
 @app.before_first_request
 def first_start():
-    #init_db()
+    #if not (os.path.isfile( app.config['DATABASE'] )):
+    init_db()
     pass
 
 ########################################################################

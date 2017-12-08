@@ -1,11 +1,10 @@
-drop table if exists printers;
-create table printers (
+create table if not exists printers (
   id integer primary key autoincrement,
   name text not null,
   route text not null,
   chars int not null
 );
-create table templates (
+create table if not exists templates (
   id integer primary key autoincrement,
   name text not null,
   url text not null,
