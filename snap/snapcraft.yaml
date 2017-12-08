@@ -24,6 +24,9 @@ parts:
     install: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/flask-app
       cp -r ./* $SNAPCRAFT_PART_INSTALL/flask-app/
+    plugs:
+      - network
+      - network-bind
   wrappers:
     plugin: dump
     source: snap_wrap/
