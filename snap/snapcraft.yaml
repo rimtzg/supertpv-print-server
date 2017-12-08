@@ -10,15 +10,15 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 architectures: [amd64, i386]
 
 apps:
-  supertpv-print-server:
+  #supertpv-print-server:
     #environment:
     #  FLASK_SECRETS: $SNAP_COMMON/flask_secrets.py
-    command: python3 $SNAP/flask-app/wsgi.py
+    #command: python3 $SNAP/flask-app/wsgi.py
     #daemon: simple
   # nginx-wrap:
   #   command: wrappers/nginx-wrap
   #   daemon: simple
-  daemon:
+  supertpv-print-server:
     command: wrappers/supertpv-print-server
     daemon: simple
 
