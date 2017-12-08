@@ -6,19 +6,12 @@ from jinja2 import Template
 import json
 
 from parser import TagParser
-#from config import Config
-#from database import Driver
 
 ########################################################################
 #                                                                      #
 #                                  INIT                                #
 #                                                                      #
 ########################################################################
-#config = Config().read()
-
-#PORT = config["LOCAL"].getint("PORT")
-#DEBUG = config["LOCAL"].getboolean("DEBUG")
-
 app = Flask(__name__)
 
 app.config.from_pyfile('server.cfg', silent=True)
