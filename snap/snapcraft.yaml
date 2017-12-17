@@ -25,6 +25,7 @@ parts:
     install: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/flask-app
       cp -r ./* $SNAPCRAFT_PART_INSTALL/flask-app/
+      cp ./server.cfg $SNAP_USER_COMMON/
 
   wrappers:
     plugin: dump
