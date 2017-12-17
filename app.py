@@ -15,12 +15,12 @@ from parser import TagParser
 ########################################################################
 app = Flask(__name__)
 
-app.config.from_pyfile('server.cfg', silent=True)
+app.config.from_pyfile( os.path.join( os.environ['SNAP_USER_COMMON'], 'server.cfg' ), silent=True)
 auth = HTTPBasicAuth()
 
 def connect_db():
     """Connects to the specific database."""
-    rv = sqlite3.connect(app.config['DATABASE'])
+    rv = sqlite3.connect( os.path.join( os.environ['SNAP_COMMON'], app.config['DATABASE'] ))
     rv.row_factory = sqlite3.Row
     return rv
 
