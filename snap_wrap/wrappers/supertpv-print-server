@@ -7,4 +7,6 @@ export LANG=C.UTF-8
 
 #[ -d $SNAP_COMMON/config ] && [ -e $SNAP_COMMON/config/flask_secrets ] && export FLASK_SECRETS=$SNAP_COMMON/config/flask_secrets
 
+cp -n $SNAP/flask-app/server.cfg $SNAP_USER_COMMON/server.cfg
+
 exec "$SNAP/bin/gunicorn" --chdir "$SNAP/flask-app" --config "$SNAP_USER_COMMON/server.cfg" --bind 0.0.0.0:5000 wsgi:app "$@"
