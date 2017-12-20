@@ -10,7 +10,7 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 #architectures: [amd64, i386]
 
 apps:
-  supertpv-print-server:
+  daemon:
     command: wrappers/supertpv-print-server
     daemon: simple
     plugs: [network, network-bind]
