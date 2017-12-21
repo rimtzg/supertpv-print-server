@@ -1,4 +1,66 @@
 {% extends "layout.html" %}
 {% block body %}
-
+<h2>Ticket printers:</h2>
+{% if ticket_printers %}
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Route</th>
+    <th>Chars</th>
+  </tr>
+  {% for printer in ticket_printers %}
+  <tr>
+    <td>{{ printer.name }}</td>
+    <td>{{ printer.route }}</td>
+    <td>{{ printer.chars }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+    <em>Unbelievable.  No ticket printers here so far</em>
+{% endif %}
+<br/>
+<h2>Label printers:</h2>
+{% if ticket_printers %}
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Queue</th>
+    <th>Width</th>
+    <th>Height</th>
+    <th>Gap</th>
+    <th>Direct Thermal</th>
+  </tr>
+  {% for printer in label_printers %}
+  <tr>
+    <td>{{ printer.name }}</td>
+    <td>{{ printer.queue }}</td>
+    <td>{{ printer.width }}</td>
+    <td>{{ printer.height }}</td>
+    <td>{{ printer.gap }}</td>
+    <td>{{ printer.direct_thermal }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+    <em>Unbelievable.  No label printers here so far</em>
+{% endif %}
+<br/>
+<h2>Templates:</h2>
+{% if templates %}
+<table>
+  <tr>
+    <th>Name</th>
+    <th>URL</th>
+  </tr>
+  {% for template in templates %}
+  <tr>
+    <td>{{ template.name }}</td>
+    <td>{{ template.url }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+    <em>Unbelievable.  No templates here so far</em>
+{% endif %}
 {% endblock %}

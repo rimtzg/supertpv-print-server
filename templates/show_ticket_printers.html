@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
-<h2>Printers</h2>
+<h2>Ticket printers</h2>
   {% if session.logged_in %}
   <h3>Add a new printer</h3>
-    <form action="{{ url_for('add_printer') }}" method=POST class=add>
+    <form action="{{ url_for('add_ticket_printer') }}" method=POST class=add>
       <dl>
         <dt>Name:
         <dd><input type=text size=40 name=name>
@@ -16,7 +16,7 @@
     </form>
   {% endif %}
   {% for printer in printers %}
-      <form action="{{ url_for('save_printer') }}" method=POST class=printer>
+      <form action="{{ url_for('save_ticket_printer') }}" method=POST class=printer>
         <dt><h3>{{ printer.name }}</h3>
         <dt>Route:
         <dd>
@@ -28,7 +28,7 @@
         <dt>Chars:
         <dd>
           {% if session.logged_in %}
-            <input type=text name=chars value={{ printer.chars }}>
+            <input type=number name=chars value={{ printer.chars }}>
           {% else %}
             {{ printer.chars }}
           {% endif %}
@@ -38,7 +38,7 @@
         {% endif %}
       </form>
       {% if session.logged_in %}
-      <form action="{{ url_for('delete_printer') }}" method=POST class=printer>
+      <form action="{{ url_for('delete_ticket_printer') }}" method=POST class=printer>
         <dt><input type=hidden name=id value={{ printer.id }}>
         <dt><input type=submit value=Delete>
       </form>

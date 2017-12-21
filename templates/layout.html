@@ -2,10 +2,12 @@
 <title>SuperTPV Printer Server</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <div class=page>
-  <h1>SuperTPV Print Server</h1>
-  <a href="{{ url_for('show_printers') }}">Printers</a> - 
+  <h1><a href="{{ url_for('main') }}">SuperTPV Print Server</a></h1>
+  <br />
+  <a href="{{ url_for('show_ticket_printers') }}">Ticket printers</a> - 
+  <a href="{{ url_for('show_label_printers') }}">Label printers</a> - 
   <a href="{{ url_for('show_templates') }}">Templates</a> - 
-  <a href="{{ url_for('show_templates') }}">Configuration</a>
+  <a href="{{ url_for('config') }}">Configuration</a>
   <div class=metanav>
   {% if not session.logged_in %}
     <a href="{{ url_for('login') }}">log in</a>

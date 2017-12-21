@@ -106,12 +106,33 @@ def pageInternalServerError(error):
 
 @app.route('/')
 def main():
-    #init_db()
-    return render_template('index.html')
+    db = get_db()
+    #GET TICKET PRINTERS
+    cur = db.execute('select id, name, route, chars from ticket_printers order by id desc')
+    ticket_printers = cur.fetchall()
+
+    #GET LABEL PRINTERS
+    cur = db.execute('select * from label_printers order by id desc')
+    label_printers = cur.fetchall()
+
+    #GET TEMPLATES
+    cur = db.execute('select id, name, url from templates order by id desc')
+    templates = cur.fetchall()
+    return render_template('index.html', ticket_printers=ticket_printers, label_printers=label_printers, templates=templates)
 
 @app.route('/test')
 def test():
     pass
+
+########################################################################
+#                                                                      #
+#                                 ONFIG                                #
+#                                                                      #
+########################################################################
+
+@app.route('/config')
+def config():
+    return render_template('index.html')
 
 ########################################################################
 #                                                                      #
@@ -166,49 +187,98 @@ def print(template_url):
 
 ########################################################################
 #                                                                      #
-#                               PRINTERS                               #
+#                            TICKET PRINTERS                           #
 #                                                                      #
 ########################################################################
 
-@app.route('/printers')
-def show_printers():
+@app.route('/printers/ticket')
+def show_ticket_printers():
     db = get_db()
-    cur = db.execute('select id, name, route, chars from printers order by id desc')
+    cur = db.execute('select id, name, route, chars from ticket_printers order by id desc')
     printers = cur.fetchall()
-    return render_template('show_printers.html', printers=printers)
+    return render_template('show_ticket_printers.html', printers=printers)
 
-@app.route('/printer/add', methods=['POST'])
-def add_printer():
+@app.route('/printer/ticket/add', methods=['POST'])
+def add_ticket_printer():
     if not session.get('logged_in'):
         abort(401)
     db = get_db()
-    db.execute('insert into printers (name, route, chars) values (?, ?, ?)',
+    db.execute('insert into ticket_printers (name, route, chars) values (?, ?, ?)',
                  [request.form['name'], request.form['route'], request.form['chars']])
     db.commit()
     flash('New printer was successfully added')
-    return redirect(url_for('show_printers'))
+    return redirect(url_for('show_ticket_printers'))
 
-@app.route('/printer/save', methods=['POST'])
-def save_printer():
+@app.route('/printer/ticket/save', methods=['POST'])
+def save_ticket_printer():
     if not session.get('logged_in'):
         abort(401)
     db = get_db()
-    db.execute('update printers set route=?, chars=? where id=?',
+    db.execute('update ticket_printers set route=?, chars=? where id=?',
                 [ request.form['route'], request.form['chars'], request.form['id'] ])
     db.commit()
     flash('Template was successfully saved')
-    return redirect(url_for('show_printers'))
+    return redirect(url_for('show_ticket_printers'))
 
-@app.route('/printer/delete', methods=['POST'])
-def delete_printer():
+@app.route('/printer/ticket/delete', methods=['POST'])
+def delete_ticket_printer():
     if not session.get('logged_in'):
         abort(401)
     db = get_db()
-    db.execute('delete from printers where id=?',
+    db.execute('delete from ticket_printers where id=?',
                  [request.form['id']])
     db.commit()
     flash('Printer was successfully deleted')
-    return redirect(url_for('show_printers'))
+    return redirect(url_for('show_ticket_printers'))
+
+########################################################################
+#                                                                      #
+#                             LABEL PRINTERS                           #
+#                                                                      #
+########################################################################
+
+@app.route('/printers/label')
+def show_label_printers():
+    db = get_db()
+    cur = db.execute('select * from label_printers order by id desc')
+    printers = cur.fetchall()
+    return render_template('show_label_printers.html', printers=printers)
+
+@app.route('/printer/label/add', methods=['POST'])
+def add_label_printer():
+    if not session.get('logged_in'):
+        abort(401)
+    db = get_db()
+
+    print("ASDF")
+    db.execute('insert into label_printers (name, queue, width, height, gap, direct_thermal) values (?, ?, ?, ?, ?, ?)',
+        [ request.form['name'], request.form['queue'], request.form['width'], request.form['height'], request.form['gap'], request.form['direct_thermal'] ] )
+                 #[ request.form['name'], request.form['queue'], request.form['width'], request.form['height'], request.form['gap'], request.form['direct_thermal'] ] )
+    db.commit()
+    flash('New printer was successfully added')
+    return redirect(url_for('show_label_printers'))
+
+@app.route('/printer/label/save', methods=['POST'])
+def save_label_printer():
+    if not session.get('logged_in'):
+        abort(401)
+    db = get_db()
+    db.execute('update label_printers set queue=?, width=?, height=?, gap=?, direct_thermal=? where id=?',
+                [ request.form['queue'], request.form['width'], request.form['height'], request.form['gap'], request.form['direct_thermal'], request.form['id'] ])
+    db.commit()
+    flash('Template was successfully saved')
+    return redirect(url_for('show_label_printers'))
+
+@app.route('/printer/label/delete', methods=['POST'])
+def delete_label_printer():
+    if not session.get('logged_in'):
+        abort(401)
+    db = get_db()
+    db.execute('delete from label_printers where id=?',
+                 [request.form['id']])
+    db.commit()
+    flash('Printer was successfully deleted')
+    return redirect(url_for('show_label_printers'))
 
 ########################################################################
 #                                                                      #
@@ -263,4 +333,4 @@ def delete_template():
 ########################################################################
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', debug=app.config['DEBUG'])

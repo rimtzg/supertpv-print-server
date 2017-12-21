@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block body %}
+<h2>Label printers</h2>
+  {% if session.logged_in %}
+  <h3>Add a new printer</h3>
+    <form action="{{ url_for('add_label_printer') }}" method=POST class=add>
+      <dl>
+        <dt>Name:
+        <dd><input type=text size=40 name=name>
+        <dt>Queue:
+        <dd><input type=text size=40 name=queue>
+        <dt>Width:
+        <dd><input type=number size=3 name=width>
+        <dt>Height:
+        <dd><input type=number size=3 name=height>
+        <dt>Gap:
+        <dd><input type=number size=3 name=gap>
+        <dt>Direct thermal:<br />
+        <input type="radio" name="direct_thermal" value="true" checked>Yes<br>
+        <input type="radio" name="direct_thermal" value="false">No<br>
+        <dd><input type=submit value=Add>
+      </dl>
+    </form>
+  {% endif %}
+  {% for printer in printers %}
+      <form action="{{ url_for('save_label_printer') }}" method=POST class=printer>
+        <dt><h3>{{ printer.name }}</h3>
+        <dt>Queue:
+        <dd>
+          {% if session.logged_in %}
+            <input type=text name=queue value={{ printer.queue }}>
+          {% else %}
+            {{ printer.queue }}
+          {% endif %}
+        <dt>Width:
+        <dd>
+          {% if session.logged_in %}
+            <input type=number name=width value={{ printer.width }}>
+          {% else %}
+            {{ printer.chars }}
+          {% endif %}
+        <dt>Height:
+        <dd>
+          {% if session.logged_in %}
+            <input type=number name=height value={{ printer.height }}>
+          {% else %}
+            {{ printer.height }}
+          {% endif %}
+        <dt>Gap:
+        <dd>
+          {% if session.logged_in %}
+            <input type=number name=gap value={{ printer.gap }}>
+          {% else %}
+            {{ printer.gap }}
+          {% endif %}
+        <dt>Direct thermal:
+        <dd>
+          {% if session.logged_in %}
+            <input type="radio" name="direct_thermal" value="true" 
+            {% if printer.direct_thermal == "true" %}
+            {{ "checked" }}
+            {% endif %}
+            >Yes<br>
+            <input type="radio" name="direct_thermal" value="false"
+            {% if printer.direct_thermal == "false" %}
+            {{ "checked" }}
+            {% endif %}
+            >No<br>
+          {% else %}
+            {{ printer.direct_thermal }}
+          {% endif %}
+
+        <dt><input type=hidden name=id value={{ printer.id }}>
+        {% if session.logged_in %}
+        <dt><input type=submit value=Save>
+        {% endif %}
+      </form>
+      {% if session.logged_in %}
+      <form action="{{ url_for('delete_label_printer') }}" method=POST class=printer>
+        <dt><input type=hidden name=id value={{ printer.id }}>
+        <dt><input type=submit value=Delete>
+      </form>
+      {% endif %}
+      <br>
+  {% else %}
+    <em>Unbelievable.  No printers here so far</em>
+  {% endfor %}
+{% endblock %}
