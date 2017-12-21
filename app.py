@@ -5,6 +5,7 @@ import sqlite3
 from jinja2 import Template
 import json
 import os
+import configparser
 
 from parser import TagParser
 
@@ -14,13 +15,11 @@ from parser import TagParser
 #                                                                      #
 ########################################################################
 app = Flask(__name__)
-
-app.config.from_pyfile( os.path.join( os.environ['SNAP_USER_COMMON'], 'server.cfg' ), silent=True)
 auth = HTTPBasicAuth()
 
 def connect_db():
     """Connects to the specific database."""
-    rv = sqlite3.connect( os.path.join( os.environ['SNAP_COMMON'], app.config['DATABASE'] ))
+    rv = sqlite3.connect( os.path.join( os.environ['SNAP_COMMON'], config['SERVER']['DATABASE'] ))
     rv.row_factory = sqlite3.Row
     return rv
 
@@ -40,7 +39,7 @@ def close_db(error):
 
 def init_db():
     db = get_db()
-    with app.open_resource('schemas.sql', mode='r') as f:
+    with app.open_resource( config['SERVER']['SCHEMA'], mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
@@ -132,7 +131,34 @@ def test():
 
 @app.route('/config')
 def config():
-    return render_template('index.html')
+    return render_template('config.html', config=config)
+
+@app.route('/config/save', methods=['POST'])
+def save_config():
+    if not session.get('logged_in'):
+        abort(401)
+
+    config['SERVER']['DATABASE'] = request.form['server_database']
+    config['SERVER']['SCHEMA'] = request.form['server_schema']
+    config['SERVER']['SECRET_KEY'] = request.form['server_secret_key']
+    config['SERVER']['DEBUG'] = request.form['server_debug']
+
+    config['APP']['SECURITY'] = request.form['app_security']
+    config['APP']['USERNAME'] = request.form['app_username']
+    config['APP']['PASSWORD'] = request.form['app_password']
+
+    config['SYNC']['SERVER'] = request.form['sync_server']
+    config['SYNC']['PORT'] = request.form['sync_port']
+    config['SYNC']['DELAY'] = request.form['sync_delay']
+    config['SYNC']['USERNAME'] = request.form['sync_username']
+    config['SYNC']['PASSWORD'] = request.form['sync_password']
+    config['SYNC']['TOKEN'] = request.form['sync_token']
+
+    with open( os.path.join( os.environ['SNAP_COMMON'], 'print-server.ini' ) , 'w') as configfile:
+        config.write(configfile)
+
+    flash('Configuration was successfully saved')
+    return redirect(url_for('config'))
 
 ########################################################################
 #                                                                      #
@@ -144,9 +170,9 @@ def config():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
+        if request.form['username'] != config['APP']['USERNAME']:
             error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
+        elif request.form['password'] != config['APP']['PASSWORD']:
             error = 'Invalid password'
         else:
             session['logged_in'] = True
@@ -333,4 +359,7 @@ def delete_template():
 ########################################################################
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=app.config['DEBUG'])
+    config = configparser.ConfigParser()
+    config.read( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) )
+    app.secret_key = config['SERVER']['SECRET_KEY']
+    app.run(host='0.0.0.0', debug=config['SERVER']['DEBUG'] )
