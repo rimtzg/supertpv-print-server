@@ -5,12 +5,14 @@
 <table>
   <tr>
     <th>Name</th>
+    <th>URI</th>
     <th>Route</th>
     <th>Chars</th>
   </tr>
   {% for printer in ticket_printers %}
   <tr>
     <td>{{ printer.name }}</td>
+    <td>{{ printer.uri }}</td>
     <td>{{ printer.route }}</td>
     <td>{{ printer.chars }}</td>
   </tr>
@@ -25,6 +27,7 @@
 <table>
   <tr>
     <th>Name</th>
+    <th>URI</th>
     <th>Queue</th>
     <th>Width</th>
     <th>Height</th>
@@ -34,6 +37,7 @@
   {% for printer in label_printers %}
   <tr>
     <td>{{ printer.name }}</td>
+    <td>{{ printer.uri }}</td>
     <td>{{ printer.queue }}</td>
     <td>{{ printer.width }}</td>
     <td>{{ printer.height }}</td>

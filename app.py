@@ -6,6 +6,7 @@ from jinja2 import Template
 import json
 import os
 import configparser
+from zebra import zebra
 
 from parser import TagParser
 
@@ -107,7 +108,7 @@ def pageInternalServerError(error):
 def main():
     db = get_db()
     #GET TICKET PRINTERS
-    cur = db.execute('select id, name, route, chars from ticket_printers order by id desc')
+    cur = db.execute('select * from ticket_printers order by id desc')
     ticket_printers = cur.fetchall()
 
     #GET LABEL PRINTERS
@@ -115,7 +116,7 @@ def main():
     label_printers = cur.fetchall()
 
     #GET TEMPLATES
-    cur = db.execute('select id, name, url from templates order by id desc')
+    cur = db.execute('select * from templates order by id desc')
     templates = cur.fetchall()
     return render_template('index.html', ticket_printers=ticket_printers, label_printers=label_printers, templates=templates)
 
@@ -195,21 +196,43 @@ def logout():
 @app.route('/print/<template_url>', methods=['POST'])
 def print(template_url):
     data = MakeBson(request.json)
-    if(data):
-        db = get_db()
-        cur = db.execute('select * from templates where url=? order by id desc limit 1', [template_url])
-        result = cur.fetchone()
+    printer_name = request.form['printer']
+    copies = request.form['copies']
 
-        if(result):
-            template = Template(result["text"])
-            parser = TagParser()
-            text = template.render(data)
-            print( parser.feed(text) )
-            return text
+    if(printer_name):
+        if(data):
+            db = get_db()
+            cur = db.execute('select * from templates where url=? order by id desc limit 1', [template_url])
+            template_object = cur.fetchone()
+
+            db = get_db()
+            cur = db.execute('select * from ticket_printers where uri=? order by id desc limit 1', [printer_name])
+            ticket_printer_object = cur.fetchone()
+
+            db = get_db()
+            cur = db.execute('select * from label_printers where uri=? order by id desc limit 1', [printer_name])
+            label_printer_object = cur.fetchone()
+
+            if(template_object):
+                template = Template(template_object['text'])
+                parser = TagParser()
+                text = template.render(data)
+
+                if(ticket_printer_object):
+                    print( parser.feed(text) )
+
+                if(label_printer_object):
+                    printer = zebra(label_printer_object['queue'])
+                    printer.setup(direct_thermal=label_printer_object['direct_thermal'], label_height=(label_printer_object['height'], label_printer_object['gap']), label_width=label_printer_object['width'])
+                    printer.output(text)
+
+                return MakeJson({"error": "Successfully printed"})
+            else:
+                return MakeJson({"error": "The template "+str(template_url)+" does not exist"})
         else:
-            return MakeJson({"error": "The template "+str(template_url)+" does not exist"})
+            return MakeJson({"error": "None data was recibed"})
     else:
-        return MakeJson({"error": "None data was recibed"})
+        return MakeJson({"error": "The printer was not indicated"})
 
 ########################################################################
 #                                                                      #
@@ -217,10 +240,27 @@ def print(template_url):
 #                                                                      #
 ########################################################################
 
+@app.route('/printers/ticket/list', methods=['GET', 'POST'])
+def list_ticket_printers():
+    db = get_db()
+    cur = db.execute('select * from ticket_printers order by id desc')
+    results = cur.fetchall()
+    printers = []
+    for result in results:
+        printer = {}
+        printer["id"] = result["id"]
+        printer["name"] = result["name"]
+        printer["route"] = result["route"]
+        printer["chars"] = int(result["chars"])
+        printer["uri"] = result["uri"]
+
+        printers.append(printer)
+    return MakeJson(printers)
+
 @app.route('/printers/ticket')
 def show_ticket_printers():
     db = get_db()
-    cur = db.execute('select id, name, route, chars from ticket_printers order by id desc')
+    cur = db.execute('select * from ticket_printers order by id desc')
     printers = cur.fetchall()
     return render_template('show_ticket_printers.html', printers=printers)
 
@@ -229,8 +269,8 @@ def add_ticket_printer():
     if not session.get('logged_in'):
         abort(401)
     db = get_db()
-    db.execute('insert into ticket_printers (name, route, chars) values (?, ?, ?)',
-                 [request.form['name'], request.form['route'], request.form['chars']])
+    db.execute('insert into ticket_printers (name, route, chars, uri) values (?, ?, ?, ?)',
+                 [request.form['name'], request.form['route'], request.form['chars'], request.form['name'].replace(' ', '').lower() ])
     db.commit()
     flash('New printer was successfully added')
     return redirect(url_for('show_ticket_printers'))
@@ -263,6 +303,29 @@ def delete_ticket_printer():
 #                                                                      #
 ########################################################################
 
+@app.route('/printers/label/list', methods=['GET', 'POST'])
+def list_label_printers():
+    db = get_db()
+    cur = db.execute('select * from label_printers order by id desc')
+    results = cur.fetchall()
+    printers = []
+    for result in results:
+        printer = {}
+        printer["id"] = result["id"]
+        printer["name"] = result["name"]
+        printer["queue"] = result["queue"]
+        printer["width"] = int(result["width"])
+        printer["height"] = int(result["height"])
+        printer["gap"] = int(result["gap"])
+        if (result["direct_thermal"] == "true"):
+            printer["direct_thermal"] = True
+        else:
+            printer["direct_thermal"] = False
+        printer["uri"] = result["uri"]
+
+        printers.append(printer)
+    return MakeJson(printers)
+
 @app.route('/printers/label')
 def show_label_printers():
     db = get_db()
@@ -276,9 +339,8 @@ def add_label_printer():
         abort(401)
     db = get_db()
 
-    print("ASDF")
-    db.execute('insert into label_printers (name, queue, width, height, gap, direct_thermal) values (?, ?, ?, ?, ?, ?)',
-        [ request.form['name'], request.form['queue'], request.form['width'], request.form['height'], request.form['gap'], request.form['direct_thermal'] ] )
+    db.execute('insert into label_printers (name, queue, width, height, gap, direct_thermal, uri) values (?, ?, ?, ?, ?, ?, ?)',
+        [ request.form['name'], request.form['queue'], request.form['width'], request.form['height'], request.form['gap'], request.form['direct_thermal'], request.form['name'].replace(' ', '').lower()] )
                  #[ request.form['name'], request.form['queue'], request.form['width'], request.form['height'], request.form['gap'], request.form['direct_thermal'] ] )
     db.commit()
     flash('New printer was successfully added')
