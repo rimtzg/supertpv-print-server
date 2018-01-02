@@ -24,6 +24,7 @@ app = Flask(__name__)
 auth = HTTPBasicAuth()
 app_config = configparser.ConfigParser()
 app_config.read( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) )
+app.secret_key = app_config['SERVER']['SECRET_KEY']
 ########################################################################
 #                                                                      #
 #                                   DB                                 #
@@ -551,6 +552,5 @@ def delete_template():
 ########################################################################
 
 if __name__ == '__main__':
-    #start_sync()
-    app.secret_key = app_config['SERVER']['SECRET_KEY']
+    start_sync()
     app.run(host='0.0.0.0', port=5000, debug=app_config['SERVER']['DEBUG'] )
