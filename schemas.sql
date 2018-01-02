@@ -18,6 +18,6 @@ create table if not exists label_printers (
 create table if not exists templates (
   id integer primary key autoincrement,
   name text not null,
-  url text not null,
+  url text not null unique,
   'text' text not null
 );

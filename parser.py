@@ -1,14 +1,20 @@
-from escpos import *
 from html.parser import HTMLParser
 
 #Printer = printer.File("/dev/usb/lp1")
 
 class TagParser(HTMLParser):
+    def parse(self, printer, stream, *args, **kwargs):
+        self.printer = printer
+        self.feed(stream)
+        
+        # self._parse(stream, False, None, *args, **kwargs)
+        # return self.tree.getDocument()
+
     def handle_starttag(self, tag, attrs):
         if(tag == "br"):
-            Printer.text("\n")
+            self.printer.text("\n")
         if(tag == "cut"):
-            Printer.cut()
+            self.printer.cut()
         if(tag == "text"):
             align = "left"
             font = "a"
@@ -85,12 +91,12 @@ class TagParser(HTMLParser):
                         data = False
                     flip = data
 
-            Printer.set(align=align, font=font, text_type=text_type, width=width, height=height, density=density, invert=invert, smooth=smooth, flip=flip)
+            self.printer.set(align=align, font=font, text_type=text_type, width=width, height=height, density=density, invert=invert, smooth=smooth, flip=flip)
 
     def handle_endtag(self, tag):
         #print("End tag  :", tag)
         if(tag == "text"):
-            Printer.text("\n")
+            self.printer.text("\n")
 
     def handle_data(self, text):
         text = text.replace("\n", "")
@@ -103,7 +109,7 @@ class TagParser(HTMLParser):
         text = text.replace("ü", "u")
         if(len(text) > 0):
             print("Imprimir: ", text)
-            Printer.text(text)
+            self.printer.text(text)
 
     def handle_comment(self, data):
         #print("Comment  :", data)

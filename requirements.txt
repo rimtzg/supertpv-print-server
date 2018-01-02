@@ -4,3 +4,4 @@ gunicorn
 pymongo
 python-escpos
 zebra
+requests

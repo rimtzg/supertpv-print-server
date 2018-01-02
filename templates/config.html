@@ -48,12 +48,18 @@
             <dd><input type=text size=40 name=sync_server value={{ config.SYNC.SERVER }}></dd>
             <dt>Port:</dt>
             <dd><input type=number size=40 name=sync_port value={{ config.SYNC.PORT }}></dd>
+            <dt>Token URL:</dt>
+            <dd><input type=text size=40 name=sync_token_url value={{ config.SYNC.TOKEN_URL }}></dd>
+            <dt>Templates URL:</dt>
+            <dd><input type=text size=40 name=sync_templates_url value={{ config.SYNC.TEMPLATES_URL }}></dd>
             <dt>Delay Time (seconds):</dt>
             <dd><input type=number size=40 name=sync_delay value={{ config.SYNC.DELAY }}></dd>
             <dt>Username:</dt>
-            <dd><input type=text size=40 name=sync_username value={{ config.SYNC.USERNAME }}></dd>
+            <dd><input type=text size=40 name=sync_username ></dd>
             <dt>Password:</dt>
-            <dd><input type=password size=40 name=sync_password value={{ config.SYNC.PASSWORD }}></dd>
+            <dd><input type=password size=40 name=sync_password ></dd>
+            <input type=submit name=get_token value='Get token'>
+            {% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
             <dt>Token:</dt>
             <dd><input type=text size=40 name=sync_token value={{ config.SYNC.TOKEN }}></dd>
 

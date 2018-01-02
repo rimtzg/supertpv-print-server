@@ -7,6 +7,11 @@ import json
 import os
 import configparser
 from zebra import zebra
+import requests
+import logging
+import threading
+import time
+from escpos.printer import File
 
 from parser import TagParser
 
@@ -17,6 +22,12 @@ from parser import TagParser
 ########################################################################
 app = Flask(__name__)
 auth = HTTPBasicAuth()
+
+########################################################################
+#                                                                      #
+#                                   DB                                 #
+#                                                                      #
+########################################################################
 
 def connect_db():
     """Connects to the specific database."""
@@ -48,7 +59,70 @@ def init_db():
 def initdb_command():
     """Initializes the database."""
     init_db()
-    print('Initialized the database.')
+    app.logger.info('Initialized the database.')
+
+########################################################################
+#                                                                      #
+#                                  SYNC                                #
+#                                                                      #
+########################################################################
+
+def start_sync():
+    def start_loop():
+        with app.app_context():
+            while True:
+                app.logger.info('Starting synchronizer loop')
+                server = config['SYNC']['SERVER']
+                port = config['SYNC']['PORT']
+                url = config['SYNC']['TEMPLATES_URL']
+                delay = int(config['SYNC']['DELAY'])
+                token = config['SYNC']['TOKEN']
+
+                response = None
+
+                server_url = 'http://' + server + ":" + port + "/" + url
+
+                app.logger.info("Getting data from " + server_url )
+
+                try:
+                    response = requests.get(server_url)
+                except:
+                    app.logger.exception("Conection error!")
+
+                if(response):
+                    if(response.status_code == requests.codes.ok):
+                        app.logger.info( 'Response: ' + response.text)
+
+                        templates = loads(response.text)
+
+                        if(type(templates) == list):
+                            db = get_db()
+                            for template in templates:
+                                if(type(template) == dict):
+                                    if( template.get('name') and template.get('text') and template.get('url') ):
+                                        sql = 'replace into templates (name, text, url) values (?, ?, ?)'
+                                        app.logger.info( 'Consult: ' + sql)
+                                        try:
+                                            db.execute(sql, [ template['name'], template['text'], template['url'] ])
+                                            db.commit()
+                                        except sqlite3.OperationalError as e:
+                                            app.logger.error('Sqlite: ' + str(e))
+
+                time.sleep(delay)
+
+    app.logger.info('Starting synchronizer')
+    thread = threading.Thread(target=start_loop)
+    thread.start()
+
+########################################################################
+#                                                                      #
+#                                FUNCTIONS                             #
+#                                                                      #
+########################################################################
+
+def save_config_file():
+    with open( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) , 'w') as configfile:
+        config.write(configfile)
 
 def MakeBson(json_raw):
     text = json.dumps(json_raw)
@@ -60,6 +134,32 @@ def MakeJson(cursor):
     bytes = text.encode()
     return bytes
 
+def get_token(server=None, port=None, url=None, username=None, password=None):
+    response = None
+    token = None
+
+    server_url = 'http://' + server + ":" + port + "/" + url
+
+    app.logger.info("Getting data from " + server_url )
+
+    try:
+        response = requests.get(server_url,
+                        auth=requests.auth.HTTPBasicAuth(
+                          username,
+                          password))
+
+    except:
+        app.logger.exception("Conection error!")
+
+    if(response):
+        app.logger.info( 'Response:' + response.text)
+
+        if (response.status_code == requests.codes.ok):
+            token = response.text
+            app.logger.info( 'Token:' + token)
+
+    return token
+
 ########################################################################
 #                                                                      #
 #                             FIRST REQUEST                            #
@@ -70,6 +170,7 @@ def MakeJson(cursor):
 def first_start():
     #if not (os.path.isfile( app.config['DATABASE'] )):
     init_db()
+    #start_sync()
     pass
 
 ########################################################################
@@ -139,27 +240,48 @@ def save_config():
     if not session.get('logged_in'):
         abort(401)
 
-    config['SERVER']['DATABASE'] = request.form['server_database']
-    config['SERVER']['SCHEMA'] = request.form['server_schema']
-    config['SERVER']['SECRET_KEY'] = request.form['server_secret_key']
-    config['SERVER']['DEBUG'] = request.form['server_debug']
+    if not(request.form.get('get_token')):
 
-    config['APP']['SECURITY'] = request.form['app_security']
-    config['APP']['USERNAME'] = request.form['app_username']
-    config['APP']['PASSWORD'] = request.form['app_password']
+        config['SERVER']['DATABASE'] = request.form['server_database']
+        config['SERVER']['SCHEMA'] = request.form['server_schema']
+        config['SERVER']['SECRET_KEY'] = request.form['server_secret_key']
+        config['SERVER']['DEBUG'] = request.form['server_debug']
 
-    config['SYNC']['SERVER'] = request.form['sync_server']
-    config['SYNC']['PORT'] = request.form['sync_port']
-    config['SYNC']['DELAY'] = request.form['sync_delay']
-    config['SYNC']['USERNAME'] = request.form['sync_username']
-    config['SYNC']['PASSWORD'] = request.form['sync_password']
-    config['SYNC']['TOKEN'] = request.form['sync_token']
+        config['APP']['SECURITY'] = request.form['app_security']
+        config['APP']['USERNAME'] = request.form['app_username']
+        config['APP']['PASSWORD'] = request.form['app_password']
 
-    with open( os.path.join( os.environ['SNAP_COMMON'], 'print-server.ini' ) , 'w') as configfile:
-        config.write(configfile)
+        config['SYNC']['SERVER'] = request.form['sync_server']
+        config['SYNC']['PORT'] = request.form['sync_port']
+        config['SYNC']['TOKEN_URL'] = request.form['sync_token_url']
+        config['SYNC']['TEMPLATES_URL'] = request.form['sync_templates_url']
+        config['SYNC']['DELAY'] = request.form['sync_delay']
+        config['SYNC']['TOKEN'] = request.form['sync_token']
 
-    flash('Configuration was successfully saved')
-    return redirect(url_for('config'))
+        save_config_file()
+
+        flash('Configuration was successfully saved')
+        return redirect(url_for('config'))
+
+    else:
+        server = config['SYNC']['SERVER']
+        port = config['SYNC']['PORT']
+        url = config['SYNC']['TOEKN_URL']
+        username = request.form['sync_username']
+        password = request.form['sync_password']
+
+        token = get_token(server, port, url, username, password)
+
+        if( token ):
+            config['SYNC']['TOKEN'] = token
+
+            save_config_file()
+
+            flash('Token was successfully saved')
+            return redirect(url_for('config'))
+        else:
+            flash('Error getting the token')
+            return redirect(url_for('config'))
 
 ########################################################################
 #                                                                      #
@@ -193,11 +315,15 @@ def logout():
 #                                                                      #
 ########################################################################
 
-@app.route('/print/<template_url>', methods=['POST'])
-def print(template_url):
+@app.route('/print/<template_url>/<printer_name>', methods=['POST'])
+def print_data(template_url, printer_name):
     data = MakeBson(request.json)
-    printer_name = request.form['printer']
-    copies = request.form['copies']
+    if(request.args.get('copies')):
+        copies = request.args['copies']
+
+    app.logger.info(data)
+    app.logger.info(printer_name)
+    app.logger.info(copies)
 
     if(printer_name):
         if(data):
@@ -215,11 +341,14 @@ def print(template_url):
 
             if(template_object):
                 template = Template(template_object['text'])
-                parser = TagParser()
                 text = template.render(data)
+                app.logger.info('Rendered text: ' + text )
 
                 if(ticket_printer_object):
-                    print( parser.feed(text) )
+                    
+                    printer = File(ticket_printer_object['route'])
+                    parser = TagParser()
+                    parser.parse(printer, text)
 
                 if(label_printer_object):
                     printer = zebra(label_printer_object['queue'])
@@ -423,5 +552,6 @@ def delete_template():
 if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) )
+    start_sync()
     app.secret_key = config['SERVER']['SECRET_KEY']
-    app.run(host='0.0.0.0', debug=config['SERVER']['DEBUG'] )
+    app.run(host='0.0.0.0', port=5001, debug=config['SERVER']['DEBUG'] )
