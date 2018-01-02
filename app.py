@@ -22,7 +22,8 @@ from parser import TagParser
 ########################################################################
 app = Flask(__name__)
 auth = HTTPBasicAuth()
-
+app_config = configparser.ConfigParser()
+app_config.read( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) )
 ########################################################################
 #                                                                      #
 #                                   DB                                 #
@@ -31,7 +32,7 @@ auth = HTTPBasicAuth()
 
 def connect_db():
     """Connects to the specific database."""
-    rv = sqlite3.connect( os.path.join( os.environ['SNAP_COMMON'], config['SERVER']['DATABASE'] ))
+    rv = sqlite3.connect( os.path.join( os.environ['SNAP_COMMON'], app_config['SERVER']['DATABASE'] ))
     rv.row_factory = sqlite3.Row
     return rv
 
@@ -51,7 +52,7 @@ def close_db(error):
 
 def init_db():
     db = get_db()
-    with app.open_resource( config['SERVER']['SCHEMA'], mode='r') as f:
+    with app.open_resource( app_config['SERVER']['SCHEMA'], mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
@@ -72,11 +73,11 @@ def start_sync():
         with app.app_context():
             while True:
                 app.logger.info('Starting synchronizer loop')
-                server = config['SYNC']['SERVER']
-                port = config['SYNC']['PORT']
-                url = config['SYNC']['TEMPLATES_URL']
-                delay = int(config['SYNC']['DELAY'])
-                token = config['SYNC']['TOKEN']
+                server = app_config['SYNC']['SERVER']
+                port = app_config['SYNC']['PORT']
+                url = app_config['SYNC']['TEMPLATES_URL']
+                delay = int(app_config['SYNC']['DELAY'])
+                token = app_config['SYNC']['TOKEN']
 
                 response = None
 
@@ -122,7 +123,7 @@ def start_sync():
 
 def save_config_file():
     with open( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) , 'w') as configfile:
-        config.write(configfile)
+        app_config.write(configfile)
 
 def MakeBson(json_raw):
     text = json.dumps(json_raw)
@@ -168,7 +169,7 @@ def get_token(server=None, port=None, url=None, username=None, password=None):
 
 @app.before_first_request
 def first_start():
-    #if not (os.path.isfile( app.config['DATABASE'] )):
+    #if not (os.path.isfile( app.conf['DATABASE'] )):
     init_db()
     #start_sync()
     pass
@@ -232,8 +233,8 @@ def test():
 ########################################################################
 
 @app.route('/config')
-def config():
-    return render_template('config.html', config=config)
+def show_config():
+    return render_template('config.html', config=app_config)
 
 @app.route('/config/save', methods=['POST'])
 def save_config():
@@ -242,21 +243,21 @@ def save_config():
 
     if not(request.form.get('get_token')):
 
-        config['SERVER']['DATABASE'] = request.form['server_database']
-        config['SERVER']['SCHEMA'] = request.form['server_schema']
-        config['SERVER']['SECRET_KEY'] = request.form['server_secret_key']
-        config['SERVER']['DEBUG'] = request.form['server_debug']
+        app_config['SERVER']['DATABASE'] = request.form['server_database']
+        app_config['SERVER']['SCHEMA'] = request.form['server_schema']
+        app_config['SERVER']['SECRET_KEY'] = request.form['server_secret_key']
+        app_config['SERVER']['DEBUG'] = request.form['server_debug']
 
-        config['APP']['SECURITY'] = request.form['app_security']
-        config['APP']['USERNAME'] = request.form['app_username']
-        config['APP']['PASSWORD'] = request.form['app_password']
+        app_config['APP']['SECURITY'] = request.form['app_security']
+        app_config['APP']['USERNAME'] = request.form['app_username']
+        app_config['APP']['PASSWORD'] = request.form['app_password']
 
-        config['SYNC']['SERVER'] = request.form['sync_server']
-        config['SYNC']['PORT'] = request.form['sync_port']
-        config['SYNC']['TOKEN_URL'] = request.form['sync_token_url']
-        config['SYNC']['TEMPLATES_URL'] = request.form['sync_templates_url']
-        config['SYNC']['DELAY'] = request.form['sync_delay']
-        config['SYNC']['TOKEN'] = request.form['sync_token']
+        app_config['SYNC']['SERVER'] = request.form['sync_server']
+        app_config['SYNC']['PORT'] = request.form['sync_port']
+        app_config['SYNC']['TOKEN_URL'] = request.form['sync_token_url']
+        app_config['SYNC']['TEMPLATES_URL'] = request.form['sync_templates_url']
+        app_config['SYNC']['DELAY'] = request.form['sync_delay']
+        app_config['SYNC']['TOKEN'] = request.form['sync_token']
 
         save_config_file()
 
@@ -264,16 +265,16 @@ def save_config():
         return redirect(url_for('config'))
 
     else:
-        server = config['SYNC']['SERVER']
-        port = config['SYNC']['PORT']
-        url = config['SYNC']['TOEKN_URL']
+        server = app_config['SYNC']['SERVER']
+        port = app_config['SYNC']['PORT']
+        url = app_config['SYNC']['TOEKN_URL']
         username = request.form['sync_username']
         password = request.form['sync_password']
 
         token = get_token(server, port, url, username, password)
 
         if( token ):
-            config['SYNC']['TOKEN'] = token
+            app_config['SYNC']['TOKEN'] = token
 
             save_config_file()
 
@@ -293,9 +294,9 @@ def save_config():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != config['APP']['USERNAME']:
+        if request.form['username'] != app_config['APP']['USERNAME']:
             error = 'Invalid username'
-        elif request.form['password'] != config['APP']['PASSWORD']:
+        elif request.form['password'] != app_config['APP']['PASSWORD']:
             error = 'Invalid password'
         else:
             session['logged_in'] = True
@@ -550,8 +551,6 @@ def delete_template():
 ########################################################################
 
 if __name__ == '__main__':
-    config = configparser.ConfigParser()
-    config.read( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) )
-    start_sync()
-    app.secret_key = config['SERVER']['SECRET_KEY']
-    app.run(host='0.0.0.0', port=5001, debug=config['SERVER']['DEBUG'] )
+    #start_sync()
+    app.secret_key = app_config['SERVER']['SECRET_KEY']
+    app.run(host='0.0.0.0', port=5000, debug=app_config['SERVER']['DEBUG'] )
