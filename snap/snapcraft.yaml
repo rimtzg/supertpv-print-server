@@ -4,8 +4,8 @@ summary: Print Server for SuperTPV # 79 char long summary
 description: |
   Print Server for SuperTPV
 
-grade: devel # must be 'stable' to release into candidate/stable channels
-confinement: devmode # use 'strict' once you have the right plugs and slots
+grade: stable # must be 'stable' to release into candidate/stable channels
+confinement: strict # use 'strict' once you have the right plugs and slots
 
 #architectures: [amd64, i386]
 
