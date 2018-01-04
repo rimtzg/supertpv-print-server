@@ -263,12 +263,12 @@ def save_config():
         save_config_file()
 
         flash('Configuration was successfully saved')
-        return redirect(url_for('config'))
+        return redirect(url_for('show_config'))
 
     else:
         server = app_config['SYNC']['SERVER']
         port = app_config['SYNC']['PORT']
-        url = app_config['SYNC']['TOEKN_URL']
+        url = app_config['SYNC']['TOKEN_URL']
         username = request.form['sync_username']
         password = request.form['sync_password']
 
@@ -280,10 +280,10 @@ def save_config():
             save_config_file()
 
             flash('Token was successfully saved')
-            return redirect(url_for('config'))
+            return redirect(url_for('show_config'))
         else:
             flash('Error getting the token')
-            return redirect(url_for('config'))
+            return redirect(url_for('show_config'))
 
 ########################################################################
 #                                                                      #
