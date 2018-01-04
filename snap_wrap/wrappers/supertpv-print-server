@@ -10,4 +10,4 @@ export LANG=C.UTF-8
 cp -n $SNAP/flask-app/gunicorn.cfg $SNAP_COMMON/gunicorn.cfg
 cp -n $SNAP/flask-app/app_config.ini $SNAP_COMMON/app_config.ini
 
-exec "$SNAP/bin/gunicorn" --chdir "$SNAP/flask-app" --config "$SNAP_COMMON/gunicorn.cfg" --bind 0.0.0.0:5000 wsgi:app "$@"
+exec "$SNAP/bin/gunicorn" --chdir "$SNAP/flask-app" --config "$SNAP_COMMON/gunicorn.cfg" wsgi:app "$@"
