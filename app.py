@@ -172,6 +172,7 @@ def get_token(server=None, port=None, url=None, username=None, password=None):
 def first_start():
     #if not (os.path.isfile( app.conf['DATABASE'] )):
     init_db()
+    start_sync()
     #start_sync()
     pass
 
@@ -552,5 +553,4 @@ def delete_template():
 ########################################################################
 
 if __name__ == '__main__':
-    start_sync()
     app.run(host='0.0.0.0', debug=app_config['SERVER']['DEBUG'] )
