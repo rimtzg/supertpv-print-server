@@ -25,6 +25,8 @@ auth = HTTPBasicAuth()
 app_config = configparser.ConfigParser()
 app_config.read( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) )
 app.secret_key = app_config['SERVER']['SECRET_KEY']
+
+TEMPLATE_TEXT = app_config['APP']['TEMPLATE_TEXT']
 ########################################################################
 #                                                                      #
 #                                   DB                                 #
@@ -427,6 +429,26 @@ def delete_ticket_printer():
                  [request.form['id']])
     db.commit()
     flash('Printer was successfully deleted')
+    return redirect(url_for('show_ticket_printers'))
+
+@app.route('/printer/ticket/test', methods=['POST'])
+def test_ticket_printer():
+    if not session.get('logged_in'):
+        abort(401)
+
+    db = get_db()
+    cur = db.execute('select * from ticket_printers where id=?', [request.form['id']])
+    ticket_printer_object = cur.fetchone()
+
+    template = Template(TEMPLATE_TEXT)
+    text = template.render({})
+    
+    if(ticket_printer_object):
+        printer = File(ticket_printer_object['route'])
+        parser = TagParser()
+        parser.parse(printer, text)
+
+    flash('The test was send printed')
     return redirect(url_for('show_ticket_printers'))
 
 ########################################################################
