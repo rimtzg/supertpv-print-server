@@ -6,7 +6,7 @@ description: |
   Print Server for SuperTPV
 
 grade: stable
-confinement: strict
+confinement: classic
 
 apps:
   supertpv-print-server:
