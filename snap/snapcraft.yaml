@@ -7,6 +7,7 @@ description: |
 
 grade: stable
 confinement: strict
+architectures: [amd64, i386]
 
 apps:
   supertpv-print-server:

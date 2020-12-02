@@ -1,3 +1,4 @@
+#GLOBALS
 from flask import Flask, render_template, g, request, session, flash, redirect, url_for
 from flask_httpauth import HTTPBasicAuth
 from bson.json_util import dumps, loads
@@ -6,14 +7,27 @@ from jinja2 import Template
 import json
 import os
 import configparser
-from zebra import zebra
+import zebra
 import requests
 import logging
 import threading
 import time
 from escpos.printer import File
+from pathlib import Path
 
+#LOCALS
 from parser import TagParser
+from config import app_config, save_config_file
+
+########################################################################
+#                                                                      #
+#                               VARIABLES                              #
+#                                                                      #
+########################################################################
+if(os.environ.get('SNAP_COMMON')):
+    DIRECTORY = os.environ['SNAP_COMMON']
+else:
+    DIRECTORY = str(Path.home())
 
 ########################################################################
 #                                                                      #
@@ -22,8 +36,6 @@ from parser import TagParser
 ########################################################################
 app = Flask(__name__)
 auth = HTTPBasicAuth()
-app_config = configparser.ConfigParser()
-app_config.read( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) )
 app.secret_key = app_config['SERVER']['SECRET_KEY']
 
 TEMPLATE_TEXT = app_config['APP']['TEMPLATE_TEXT']
@@ -35,7 +47,7 @@ TEMPLATE_TEXT = app_config['APP']['TEMPLATE_TEXT']
 
 def connect_db():
     """Connects to the specific database."""
-    rv = sqlite3.connect( os.path.join( os.environ['SNAP_COMMON'], app_config['SERVER']['DATABASE'] ))
+    rv = sqlite3.connect( os.path.join( DIRECTORY, app_config['SERVER']['DATABASE'] ))
     rv.row_factory = sqlite3.Row
     return rv
 
@@ -125,7 +137,7 @@ def start_sync():
 ########################################################################
 
 def save_config_file():
-    with open( os.path.join( os.environ['SNAP_COMMON'], 'app_config.ini' ) , 'w') as configfile:
+    with open( os.path.join( DIRECTORY, FILE ) , 'w') as configfile:
         app_config.write(configfile)
 
 def MakeBson(json_raw):
