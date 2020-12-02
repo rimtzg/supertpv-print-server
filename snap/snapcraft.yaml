@@ -11,7 +11,6 @@ confinement: strict
 apps:
   supertpv-print-server:
     command: wrappers/supertpv-print-server
-    daemon: simple
     plugs: [network, network-bind, raw-usb]
 
 parts:
