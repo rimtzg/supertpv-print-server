@@ -6,3 +6,4 @@ python-escpos
 zebra
 requests
 setuptools_scm
+flask_cors

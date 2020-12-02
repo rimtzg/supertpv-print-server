@@ -1,6 +1,7 @@
 #GLOBALS
 from flask import Flask, render_template, g, request, session, flash, redirect, url_for
 from flask_httpauth import HTTPBasicAuth
+from flask_cors import CORS
 from bson.json_util import dumps, loads
 import sqlite3
 from jinja2 import Template
@@ -35,6 +36,7 @@ else:
 #                                                                      #
 ########################################################################
 app = Flask(__name__)
+cors = CORS(app)
 auth = HTTPBasicAuth()
 app.secret_key = app_config['SERVER']['SECRET_KEY']
 
@@ -186,7 +188,7 @@ def get_token(server=None, port=None, url=None, username=None, password=None):
 def first_start():
     #if not (os.path.isfile( app.conf['DATABASE'] )):
     init_db()
-    start_sync()
+    # start_sync()
     #start_sync()
     pass
 
@@ -335,6 +337,8 @@ def logout():
 @app.route('/print/<template_url>/<printer_name>', methods=['POST'])
 def print_data(template_url, printer_name):
     data = MakeBson(request.json)
+
+    copies = 1
     if(request.args.get('copies')):
         copies = request.args['copies']
 
