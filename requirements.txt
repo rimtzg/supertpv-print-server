@@ -5,3 +5,4 @@ pymongo
 python-escpos
 zebra
 requests
+setuptools_scm
