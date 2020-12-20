@@ -1,5 +1,5 @@
 #GLOBALS
-from flask import Flask, render_template, g, request, session, flash, redirect, url_for
+from flask import Flask, render_template, g, request, session, flash, redirect, url_for, abort, jsonify
 from flask_httpauth import HTTPBasicAuth
 from flask_cors import CORS
 from bson.json_util import dumps, loads
@@ -8,7 +8,7 @@ from jinja2 import Template
 import json
 import os
 import configparser
-import zebra
+from zebra import Zebra
 import requests
 import logging
 import threading
@@ -194,29 +194,33 @@ def first_start():
 
 ########################################################################
 #                                                                      #
-#                            ERROR HANDLER                             #
+#                             ERROR HANDKER                            #
 #                                                                      #
 ########################################################################
 
 @app.errorhandler(400)
 def pageBadRequest(error):
-    return MakeJson({"error" : "400 Bad Request"})
+    return jsonify({"error" : "400 Bad Request"}), 400
 
 @app.errorhandler(401)
 def pageUnauthorizedAccess(error):
-    return MakeJson({"error" : "401 Unauthorized Access"})
+    return jsonify({"error" : "401 Unauthorized Access"}), 401
+
+@app.errorhandler(403)
+def pageForbidden(error):
+    return jsonify({"error" : "403 Forbidden"}), 403
 
 @app.errorhandler(404)
 def pageNotFound(error):
-    return MakeJson({"error" : "404 Not Found"})
+    return jsonify({"error" : "404 Not Found"}), 404
 
 @app.errorhandler(405)
 def pageMethodNotAllowed(error):
-    return MakeJson({"error" : "405 Method Not Allowed"})
+    return jsonify({"error" : "405 Method Not Allowed"}), 405
 
 @app.errorhandler(500)
 def pageInternalServerError(error):
-    return MakeJson({"error" : "500 Internal Server Error"})
+    return jsonify({"error" : "500 Internal Server Error"}), 500
 
 ########################################################################
 #                                                                      #
@@ -334,7 +338,7 @@ def logout():
 #                                                                      #
 ########################################################################
 
-@app.route('/print/<template_url>/<printer_name>', methods=['POST'])
+@app.route('/print/<printer_name>/<template_url>', methods=['POST'])
 def print_data(template_url, printer_name):
     data = MakeBson(request.json)
 
@@ -372,17 +376,17 @@ def print_data(template_url, printer_name):
                     parser.parse(printer, text)
 
                 if(label_printer_object):
-                    printer = zebra(label_printer_object['queue'])
-                    printer.setup(direct_thermal=label_printer_object['direct_thermal'], label_height=(label_printer_object['height'], label_printer_object['gap']), label_width=label_printer_object['width'])
+                    printer = Zebra(label_printer_object['queue'])
+                    printer.setup(direct_thermal=label_printer_object['direct_thermal'])
                     printer.output(text)
 
-                return MakeJson({"error": "Successfully printed"})
+                return MakeJson({"status": "Successfully printed"})
             else:
-                return MakeJson({"error": "The template "+str(template_url)+" does not exist"})
+                return abort(404, "The template "+str(template_url)+" does not exist")
         else:
-            return MakeJson({"error": "None data was recibed"})
+            return abort(400, "None data was recibed")
     else:
-        return MakeJson({"error": "The printer was not indicated"})
+        return abort(404, "The printer was not indicated")
 
 ########################################################################
 #                                                                      #
