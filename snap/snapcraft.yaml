@@ -21,7 +21,7 @@ parts:
     source: .
     python-version: python3
     requirements: requirements.txt
-    stage-packages: [zlib1g, zlib1g-dev, libjpeg-dev]
+    stage-packages: [zlib1g, zlib1g-dev, libjpeg-dev, lpr]
     build-packages: [libexpat1-dev, libpython3-dev, libpython3.5, libpython3.5-dev, python-pip-whl, python3-dev, python3-pip, python3.5-dev]
     install: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/flask-app
