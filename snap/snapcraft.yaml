@@ -1,6 +1,6 @@
 name: supertpv-print-server
 #base: core18 # the base snap is the execution environment for this snap
-version: '1.2'
+version: '1.3'
 summary: Print Server for SuperTPV
 description: |
   Print Server for SuperTPV
@@ -10,8 +10,8 @@ confinement: strict
 architectures: [amd64]
 
 apps:
-  supertpv-print-server:
-    command: wrappers/supertpv-print-server
+  server:
+    command: wrappers/run
     daemon: simple
     plugs: [network, network-bind, raw-usb, cups-control]
 

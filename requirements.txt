@@ -1,6 +1,6 @@
 Flask
 flask_httpauth
-gunicorn
+gunicorn[eventlet]
 pymongo
 python-escpos
 zebra
