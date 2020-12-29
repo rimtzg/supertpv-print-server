@@ -24,8 +24,8 @@ parts:
     stage-packages: [zlib1g, zlib1g-dev, libjpeg-dev, lpr]
     build-packages: [libexpat1-dev, libpython3-dev, libpython3.5, libpython3.5-dev, python-pip-whl, python3-dev, python3-pip, python3.5-dev]
     install: |
-      mkdir -p $SNAPCRAFT_PART_INSTALL/flask-app
-      cp -r ./* $SNAPCRAFT_PART_INSTALL/flask-app/
+      mkdir -p $SNAPCRAFT_PART_INSTALL/app
+      cp -r ./* $SNAPCRAFT_PART_INSTALL/app/
 
   wrappers:
     plugin: dump
