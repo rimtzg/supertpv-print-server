@@ -7,4 +7,4 @@ export LANG=C.UTF-8
 
 cp -n $SNAP/app/app_config.ini $SNAP_COMMON/app_config.ini
 
-exec "$SNAP/bin/gunicorn" --chdir "$SNAP/app" wsgi:app "$@" -t 240 --worker-class eventlet
+exec "$SNAP/bin/gunicorn" --chdir "$SNAP/app" -b 127.0.0.1:5000 wsgi:app "$@" -t 240 --worker-class eventlet
