@@ -32,6 +32,16 @@ else:
     IS_WINDOWS = False
     import subprocess
 
+import os
+from pathlib import Path
+
+if(os.environ.get('SNAP_COMMON')):
+    DIRECTORY = os.environ['SNAP_COMMON']
+else:
+    DIRECTORY = str(Path.home())
+
+FILE = os.path.join( DIRECTORY, 'print' )
+
 class Zebra:
     """A class to communicate with (Zebra) label printers"""
 
@@ -40,7 +50,8 @@ class Zebra:
         self.queue = queue
 
     def _output_unix(self, commands):
-        command = 'lp -o raw'.format(self.queue)
+        file = open( FILE, "w+")
+        command = 'lpr -o raw'.format(self.queue)
         logging.info(command)
         args = shlex.split(command)
         p = subprocess.Popen(args, stdin=subprocess.PIPE)
