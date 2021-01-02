@@ -40,7 +40,7 @@ class Zebra:
         self.queue = queue
 
     def _output_unix(self, commands):
-        command = 'lpr -P{} -H localhost:631 -oraw'.format(self.queue)
+        command = 'lp -o raw'.format(self.queue)
         logging.info(command)
         args = shlex.split(command)
         p = subprocess.Popen(args, stdin=subprocess.PIPE)
