@@ -57,9 +57,9 @@ class Zebra:
         command = 'lpr -o raw {}'.format(FILE)
         print(command)
         args = shlex.split(command)
-        p = subprocess.Popen(args, stdin=subprocess.PIPE)
-        p.communicate(commands)
-        p.stdin.close()
+        p = subprocess.Popen(args)
+        #p.communicate(commands)
+        #p.stdin.close()
 
     def _output_win(self, commands):
         if self.queue == 'zebra_python_unittest':
