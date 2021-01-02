@@ -41,7 +41,7 @@ class Zebra:
         if self.queue == 'zebra_python_unittest':
             p = subprocess.Popen(['cat','-'], stdin=subprocess.PIPE)
         else:
-            p = subprocess.Popen(['lpr','-P {}'.format(self.queue),'-o raw'], stdin=subprocess.PIPE)
+            p = subprocess.Popen(['lpr','-P{}'.format(self.queue),'-H localhost:631','-oraw'], stdin=subprocess.PIPE)
         p.communicate(commands)
         p.stdin.close()
 
