@@ -51,7 +51,8 @@ class Zebra:
 
     def _output_unix(self, commands):
         file = open( FILE, "w+")
-        command = 'lpr -o raw'.format(self.queue)
+        
+        command = 'lpr -o raw {}'.format(FILE)
         logging.info(command)
         args = shlex.split(command)
         p = subprocess.Popen(args, stdin=subprocess.PIPE)
