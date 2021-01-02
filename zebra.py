@@ -50,10 +50,12 @@ class Zebra:
         self.queue = queue
 
     def _output_unix(self, commands):
-        file = open( FILE, "w+")
-        
+        file = open( FILE, "w")
+        print(FILE)
+        file.write(commands.decode("utf-8"))
+        file.close()
         command = 'lpr -o raw {}'.format(FILE)
-        logging.info(command)
+        print(command)
         args = shlex.split(command)
         p = subprocess.Popen(args, stdin=subprocess.PIPE)
         p.communicate(commands)
