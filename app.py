@@ -596,4 +596,4 @@ def delete_template():
 ########################################################################
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=app_config['SERVER']['DEBUG'] )
+    app.run(host='0.0.0.0', port=5000, debug=app_config['SERVER']['DEBUG'] )
