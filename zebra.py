@@ -41,7 +41,7 @@ class Zebra:
 
     def _output_unix(self, commands):
         command = 'lpr -P{} -H localhost:631 -oraw'.format(self.queue)
-        print(command)
+        logging.info(command)
         args = shlex.split(command)
         p = subprocess.Popen(args, stdin=subprocess.PIPE)
         p.communicate(commands)
