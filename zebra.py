@@ -22,8 +22,11 @@
 
 import os.path
 import sys
+<<<<<<< HEAD
 import shlex
 import logging
+=======
+>>>>>>> ff7254310f5f0a6056d307622f90e7fd2f13e991
 
 if sys.platform.lower().startswith('win'):
     IS_WINDOWS = True
@@ -40,10 +43,17 @@ class Zebra:
         self.queue = queue
 
     def _output_unix(self, commands):
+<<<<<<< HEAD
         command = 'lpr -P{} -H localhost:631 -oraw'.format(self.queue)
         print(command)
         args = shlex.split(command)
         p = subprocess.Popen(args, stdin=subprocess.PIPE)
+=======
+        if self.queue == 'zebra_python_unittest':
+            p = subprocess.Popen(['cat','-'], stdin=subprocess.PIPE)
+        else:
+            p = subprocess.Popen(['lpr','-P{}'.format(self.queue),'-H localhost:631','-oraw'], stdin=subprocess.PIPE)
+>>>>>>> ff7254310f5f0a6056d307622f90e7fd2f13e991
         p.communicate(commands)
         p.stdin.close()
 
