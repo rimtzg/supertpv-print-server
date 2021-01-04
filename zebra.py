@@ -22,8 +22,6 @@
 
 import os.path
 import sys
-import shlex
-import logging
 
 if sys.platform.lower().startswith('win'):
     IS_WINDOWS = True
@@ -31,16 +29,6 @@ if sys.platform.lower().startswith('win'):
 else:
     IS_WINDOWS = False
     import subprocess
-
-import os
-from pathlib import Path
-
-if(os.environ.get('SNAP_COMMON')):
-    DIRECTORY = os.environ['SNAP_COMMON']
-else:
-    DIRECTORY = str(Path.home())
-
-FILE = os.path.join( DIRECTORY, 'print' )
 
 class Zebra:
     """A class to communicate with (Zebra) label printers"""
@@ -50,16 +38,12 @@ class Zebra:
         self.queue = queue
 
     def _output_unix(self, commands):
-        file = open( FILE, "w")
-        print(FILE)
-        file.write(commands.decode("utf-8"))
-        file.close()
-        command = 'lpr -o raw {}'.format(FILE)
-        print(command)
-        args = shlex.split(command)
-        p = subprocess.Popen(args)
-        #p.communicate(commands)
-        #p.stdin.close()
+        if self.queue == 'zebra_python_unittest':
+            p = subprocess.Popen(['cat','-'], stdin=subprocess.PIPE)
+        else:
+            p = subprocess.Popen(['lpr','-P{}'.format(self.queue),'-oraw'], stdin=subprocess.PIPE)
+        p.communicate(commands)
+        p.stdin.close()
 
     def _output_win(self, commands):
         if self.queue == 'zebra_python_unittest':
