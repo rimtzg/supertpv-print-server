@@ -55,7 +55,7 @@ class Zebra:
         file.write(commands.decode('UTF-8'))
         file.close()
 
-        command = 'lpr -P{} -l {}'.format(self.queue, FILE)
+        command = '/usr/bin/lpr -P{} -l {}'.format(self.queue, FILE)
         args = shlex.split(command)
         print(args)
 
