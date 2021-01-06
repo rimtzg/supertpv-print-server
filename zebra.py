@@ -60,7 +60,7 @@ class Zebra:
         print(args)
 
         #subprocess.run(args, stdin=subprocess.PIPE, check=True)
-        p = subprocess.Popen(args, stdin=subprocess.PIPE, check=True)
+        p = subprocess.Popen(args, stdin=subprocess.PIPE)
         p.communicate(commands)
         p.stdin.close()
 
