@@ -20,8 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 import os.path
 import sys
+
+import shlex
 
 if sys.platform.lower().startswith('win'):
     IS_WINDOWS = True
@@ -29,6 +32,15 @@ if sys.platform.lower().startswith('win'):
 else:
     IS_WINDOWS = False
     import subprocess
+
+from pathlib import Path
+
+if(os.environ.get('SNAP_COMMON')):
+    DIRECTORY = os.environ['SNAP_COMMON']
+else:
+    DIRECTORY = str(Path.home())
+
+FILE = os.path.join(DIRECTORY, 'print')
 
 class Zebra:
     """A class to communicate with (Zebra) label printers"""
@@ -38,12 +50,21 @@ class Zebra:
         self.queue = queue
 
     def _output_unix(self, commands):
-        if self.queue == 'zebra_python_unittest':
-            p = subprocess.Popen(['cat','-'], stdin=subprocess.PIPE)
-        else:
-            p = subprocess.Popen(['lpr','-P{}'.format(self.queue),'-oraw'], stdin=subprocess.PIPE)
-        p.communicate(commands)
-        p.stdin.close()
+        #Save commans to document
+        file = open(FILE, 'w')
+        file.write(commands.decode('UTF-8'))
+        file.close()
+
+        command = 'lpr -P{} -l {}'.format(self.queue, FILE)
+        args = shlex.split(command)
+
+        subprocess.run(args, shell=True, check=True)
+        # if self.queue == 'zebra_python_unittest':
+        #     p = subprocess.Popen(['cat','-'], stdin=subprocess.PIPE)
+        # else:
+        #     p = subprocess.Popen(['lpr','-P{}'.format(self.queue),'-oraw'], stdin=subprocess.PIPE)
+        # p.communicate(commands)
+        # p.stdin.close()
 
     def _output_win(self, commands):
         if self.queue == 'zebra_python_unittest':
