@@ -13,7 +13,7 @@ apps:
   server:
     command: wrappers/run
     daemon: simple
-    plugs: [network, network-bind, raw-usb, cups-control]
+    plugs: [network, network-bind, raw-usb, cups-control, process-control]
 
 parts:
   supertpv-print-server:
