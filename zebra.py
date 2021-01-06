@@ -55,11 +55,15 @@ class Zebra:
         file.write(commands.decode('UTF-8'))
         file.close()
 
-        command = 'lpr -H localhost:631 -P{} -l {}'.format(self.queue, FILE)
+        command = 'lpr -H localhost:631 -P{} -oraw'.format(self.queue)
         args = shlex.split(command)
         print(args)
 
-        subprocess.run(args, stdin=subprocess.STDOUT, check=True)
+        #subprocess.run(args, stdin=subprocess.PIPE, check=True)
+        p = subprocess.Popen(args, stdin=subprocess.PIPE, check=True)
+        p.communicate(commands)
+        p.stdin.close()
+
         # if self.queue == 'zebra_python_unittest':
         #     p = subprocess.Popen(['cat','-'], stdin=subprocess.PIPE)
         # else:
