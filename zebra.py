@@ -51,9 +51,9 @@ class Zebra:
 
     def _output_unix(self, commands):
         #Save commans to document
-        file = open(FILE, 'w')
-        file.write(commands.decode('UTF-8'))
-        file.close()
+        # file = open(FILE, 'w')
+        # file.write(commands.decode('UTF-8'))
+        # file.close()
 
         command = 'lpr -H localhost:631 -P{} -oraw'.format(self.queue)
         args = shlex.split(command)
