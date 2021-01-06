@@ -59,7 +59,7 @@ class Zebra:
         args = shlex.split(command)
         print(args)
 
-        subprocess.run(args)
+        subprocess.run(args, stdin=subprocess.PIPE, check=True)
         # if self.queue == 'zebra_python_unittest':
         #     p = subprocess.Popen(['cat','-'], stdin=subprocess.PIPE)
         # else:
