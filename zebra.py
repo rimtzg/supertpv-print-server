@@ -51,18 +51,18 @@ class Zebra:
 
     def _output_unix(self, commands):
         #Save commans to document
-        # file = open(FILE, 'w')
-        # file.write(commands.decode('UTF-8'))
-        # file.close()
+        file = open(FILE, 'w')
+        file.write(commands.decode('UTF-8'))
+        file.close()
 
-        command = 'lpr -l -P{}'.format(self.queue)
+        command = 'lpr -l -P{} {}'.format(self.queue, FILE)
         args = shlex.split(command)
         print(args)
 
-        #subprocess.run(args, stdin=subprocess.PIPE, check=True)
-        p = subprocess.Popen(args, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        p.communicate(commands)
-        p.stdin.close()
+        subprocess.run(args, shell=True, check=True)
+        # p = subprocess.Popen(args, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # p.communicate(commands)
+        # p.stdin.close()
 
         # if self.queue == 'zebra_python_unittest':
         #     p = subprocess.Popen(['cat','-'], stdin=subprocess.PIPE)
