@@ -55,12 +55,12 @@ class Zebra:
         # file.write(commands.decode('UTF-8'))
         # file.close()
 
-        command = 'lpr -P{} -l'.format(self.queue)
+        command = 'lpr -l -P{}'.format(self.queue)
         args = shlex.split(command)
         print(args)
 
         #subprocess.run(args, stdin=subprocess.PIPE, check=True)
-        p = subprocess.Popen(args, stdin=subprocess.PIPE)
+        p = subprocess.Popen(args, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         p.communicate(commands)
         p.stdin.close()
 
