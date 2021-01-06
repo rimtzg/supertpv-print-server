@@ -52,7 +52,7 @@ class Zebra:
     def _output_unix(self, commands):
         #Save commans to document
         file = open(FILE, 'w')
-        file.write(commands.decode('UTF-8'))
+        file.write(commands)
         file.close()
 
         command = 'lpr -l -P{} {}'.format(self.queue, FILE)
