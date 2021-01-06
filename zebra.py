@@ -57,6 +57,7 @@ class Zebra:
 
         command = 'lpr -P{} -l {}'.format(self.queue, FILE)
         args = shlex.split(command)
+        print(args)
 
         subprocess.run(args, shell=True, check=True)
         # if self.queue == 'zebra_python_unittest':
