@@ -59,7 +59,7 @@ class Zebra:
         args = shlex.split(command)
         print(args)
 
-        subprocess.run(args, check=True)
+        subprocess.run(command, shell=True, check=True)
         # p = subprocess.Popen(args, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # p.communicate(commands)
         # p.stdin.close()
