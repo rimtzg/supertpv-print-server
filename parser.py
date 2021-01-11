@@ -3,8 +3,9 @@ from html.parser import HTMLParser
 #Printer = printer.File("/dev/usb/lp1")
 
 class TagParser(HTMLParser):
-    def parse(self, printer, stream, *args, **kwargs):
+    def parse(self, printer, stream, chars, *args, **kwargs):
         self.printer = printer
+        self.chars = int(chars)
         self.feed(stream)
         
         # self._parse(stream, False, None, *args, **kwargs)
@@ -17,7 +18,7 @@ class TagParser(HTMLParser):
             self.printer.cut()
         if(tag == "line"):
             self.printer.set(align="center")
-            self.printer.text(("-"*30) + "\n")
+            self.printer.text(( "-" * self.chars ) + "\n")
         if(tag == "text"):
             align = "left"
             font = "a"

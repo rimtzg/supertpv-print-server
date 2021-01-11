@@ -374,7 +374,7 @@ def print_data(template_url, printer_name):
                     
                     printer = File(ticket_printer_object['route'])
                     parser = TagParser()
-                    parser.parse(printer, text)
+                    parser.parse(printer, text, ticket_printer_object['chars'])
 
                 if(label_printer_object):
                     printer = Zebra(label_printer_object['queue'])
