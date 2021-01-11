@@ -15,6 +15,9 @@ class TagParser(HTMLParser):
             self.printer.text("\n")
         if(tag == "cut"):
             self.printer.cut()
+        if(tag == "line"):
+            self.printer.set(align="center")
+            self.printer.text("-"*30)
         if(tag == "text"):
             align = "left"
             font = "a"
