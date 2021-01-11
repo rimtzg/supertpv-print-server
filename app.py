@@ -15,7 +15,7 @@ import threading
 import time
 from escpos.printer import File
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, date
 
 #LOCALS
 from parser import TagParser
@@ -367,7 +367,7 @@ def print_data(template_url, printer_name):
 
             if(template_object):
                 template = Template(template_object['text'])
-                text = template.render(data, datetime=datetime) + '\n'
+                text = template.render(data, datetime=datetime, date=date) + '\n'
                 app.logger.info('Rendered text: ' + text )
 
                 if(ticket_printer_object):
