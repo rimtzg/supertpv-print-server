@@ -367,7 +367,7 @@ def print_data(template_url, printer_name):
 
             if(template_object):
                 template = Template(template_object['text'])
-                text = template.render(data, datetime=datetime, timedelta=timedelta) + '\n'
+                text = template.render(data, copies=copies, datetime=datetime, timedelta=timedelta) + '\n'
                 app.logger.info('Rendered text: ' + text )
 
                 if(ticket_printer_object):
