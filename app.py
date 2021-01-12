@@ -345,7 +345,7 @@ def print_data(template_url, printer_name):
 
     copies = 1
     if(request.args.get('copies')):
-        copies = request.args['copies']
+        copies = int(request.args['copies'])
 
     app.logger.info(data)
     app.logger.info(printer_name)
@@ -371,10 +371,11 @@ def print_data(template_url, printer_name):
                 app.logger.info('Rendered text: ' + text )
 
                 if(ticket_printer_object):
-                    
                     printer = File(ticket_printer_object['route'])
                     parser = TagParser()
-                    parser.parse(printer, text, ticket_printer_object['chars'])
+                    for x in range(copies):
+                        parser.parse(printer, text, ticket_printer_object['chars'])
+                        app.logger.info('Print copy no. ' + str(x) )
 
                 if(label_printer_object):
                     printer = Zebra(label_printer_object['queue'])
