@@ -1,0 +1,1 @@
+from syncs.templates import sync_templates

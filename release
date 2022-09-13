@@ -1,0 +1,4 @@
+#!/bin/bash
+
+RELEASE=$(snapcraft status supertpv-print-server | sed -n 5p | awk '{ print $NF }') &&
+snapcraft release supertpv-print-server $RELEASE stable

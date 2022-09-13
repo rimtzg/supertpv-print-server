@@ -1,6 +1,4 @@
-from app import app
-from app import start_sync
+from main import app
 
 if __name__ == "__main__":
-    start_sync()
     app.run()

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+snapcraft --debug &&
+snapcraft upload --release=edge supertpv-print-server_* &&
+rm supertpv-print-server_*

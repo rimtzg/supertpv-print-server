@@ -1,6 +1,6 @@
 name: supertpv-print-server
-#base: core18 # the base snap is the execution environment for this snap
-version: '1.3'
+base: core20
+version: '1.4.1'
 summary: Print Server for SuperTPV
 description: |
   Print Server for SuperTPV
@@ -10,20 +10,26 @@ confinement: strict
 architectures: [amd64]
 
 apps:
-  server:
+  supertpv-print-server:
     command: wrappers/run
     daemon: simple
     plugs: [network, network-bind, raw-usb, cups-control, process-control]
+    environment:
+      PYTHONPATH: $SNAP/lib/python3/dist-packages
 
 parts:
   supertpv-print-server:
     plugin: python
     source: .
-    python-version: python3
-    requirements: requirements.txt
-    stage-packages: [zlib1g, zlib1g-dev, libjpeg-dev, cups-bsd]
-    build-packages: [libexpat1-dev, libpython3-dev, libpython3.5, libpython3.5-dev, python-pip-whl, python3-dev, python3-pip, python3.5-dev]
-    install: |
+    requirements: [requirements.txt]
+    stage-packages:
+      - libpython3.9-stdlib
+      - libpython3.9-minimal
+      - python3.9-minimal
+    build-environment:
+      - PYTHONPATH: $SNAPCRAFT_PART_INSTALL/lib/python3/dist-packages:$PYTHONPATH
+    override-build: |
+      snapcraftctl build
       mkdir -p $SNAPCRAFT_PART_INSTALL/app
       cp -r ./* $SNAPCRAFT_PART_INSTALL/app/
 

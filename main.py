@@ -4,7 +4,10 @@ from flask_httpauth import HTTPBasicAuth
 from flask_cors import CORS
 from bson.json_util import dumps, loads
 import sqlite3
+
+import jinja2
 from jinja2 import Template
+
 import json
 import os
 import configparser
@@ -20,6 +23,21 @@ from datetime import datetime, date, timedelta
 #LOCALS
 from parser import TagParser
 from config import app_config, save_config_file
+
+#Import FILTERS
+from filters import str_filter
+from filters import url_pagination
+from filters import date_filter
+from filters import datetime_filter
+from filters import currency_filter
+from filters import integer_filter
+from filters import numeric_filter
+from filters import percent_filter
+from filters import time_filter
+from filters import to_object_id_filter
+from filters import calendar_filter
+from filters import humanize_date
+from filters import human_datetime_filter
 
 ########################################################################
 #                                                                      #
@@ -42,6 +60,28 @@ auth = HTTPBasicAuth()
 app.secret_key = app_config['SERVER']['SECRET_KEY']
 
 TEMPLATE_TEXT = app_config['APP']['TEMPLATE_TEXT']
+
+logging.basicConfig(level=logging.DEBUG)
+
+########################################################################
+#                                                                      #
+#                              PROCESSORS                              #
+#                                                                      #
+########################################################################
+
+jinja2.filters.FILTERS['oid'] = to_object_id_filter
+jinja2.filters.FILTERS['str'] = str_filter
+jinja2.filters.FILTERS['date'] = date_filter
+jinja2.filters.FILTERS['time'] = time_filter
+jinja2.filters.FILTERS['datetime'] = datetime_filter
+jinja2.filters.FILTERS['currency'] = currency_filter
+jinja2.filters.FILTERS['numeric'] = numeric_filter
+jinja2.filters.FILTERS['percent'] = percent_filter
+jinja2.filters.FILTERS['integer'] = integer_filter
+jinja2.filters.FILTERS['calendar'] = calendar_filter
+jinja2.filters.FILTERS['humanize'] = humanize_date
+jinja2.filters.FILTERS['human_datetime'] = human_datetime_filter
+
 ########################################################################
 #                                                                      #
 #                                   DB                                 #
@@ -82,66 +122,9 @@ def initdb_command():
 
 ########################################################################
 #                                                                      #
-#                                  SYNC                                #
-#                                                                      #
-########################################################################
-
-def start_sync():
-    def start_loop():
-        with app.app_context():
-            while True:
-                app.logger.info('Starting synchronizer loop')
-                server = app_config['SYNC']['SERVER']
-                port = app_config['SYNC']['PORT']
-                url = app_config['SYNC']['TEMPLATES_URL']
-                delay = int(app_config['SYNC']['DELAY'])
-                token = app_config['SYNC']['TOKEN']
-
-                response = None
-
-                server_url = 'http://' + server + ":" + port + "/" + url
-
-                app.logger.info("Getting data from " + server_url )
-
-                try:
-                    response = requests.get(server_url)
-                except:
-                    app.logger.exception("Conection error!")
-
-                if(response):
-                    if(response.status_code == requests.codes.ok):
-                        app.logger.info( 'Response: ' + response.text)
-
-                        templates = loads(response.text)
-
-                        if(type(templates) == list):
-                            db = get_db()
-                            for template in templates:
-                                if(type(template) == dict):
-                                    if( template.get('name') and template.get('text') and template.get('url') ):
-                                        sql = 'replace into templates (name, text, url) values (?, ?, ?)'
-                                        app.logger.info( 'Consult: ' + sql)
-                                        try:
-                                            db.execute(sql, [ template['name'], template['text'], template['url'] ])
-                                            db.commit()
-                                        except sqlite3.OperationalError as e:
-                                            app.logger.error('Sqlite: ' + str(e))
-
-                time.sleep(delay)
-
-    app.logger.info('Starting synchronizer')
-    thread = threading.Thread(target=start_loop)
-    thread.start()
-
-########################################################################
-#                                                                      #
 #                                FUNCTIONS                             #
 #                                                                      #
 ########################################################################
-
-def save_config_file():
-    with open( os.path.join( DIRECTORY, FILE ) , 'w') as configfile:
-        app_config.write(configfile)
 
 def MakeBson(json_raw):
     text = json.dumps(json_raw)
@@ -185,12 +168,17 @@ def get_token(server=None, port=None, url=None, username=None, password=None):
 #                                                                      #
 ########################################################################
 
+from syncs import sync_templates
+
 @app.before_first_request
 def first_start():
     #if not (os.path.isfile( app.conf['DATABASE'] )):
     init_db()
     # start_sync()
     #start_sync()
+    thread = threading.Thread(target=sync_templates)
+    thread.start()
+
     pass
 
 ########################################################################
@@ -230,7 +218,7 @@ def pageInternalServerError(error):
 ########################################################################
 
 @app.route('/')
-def main():
+def index():
     db = get_db()
     #GET TICKET PRINTERS
     cur = db.execute('select * from ticket_printers order by id desc')
@@ -251,7 +239,7 @@ def test():
 
 ########################################################################
 #                                                                      #
-#                                 ONFIG                                #
+#                                CONFIG                                #
 #                                                                      #
 ########################################################################
 
@@ -264,48 +252,23 @@ def save_config():
     if not session.get('logged_in'):
         abort(401)
 
-    if not(request.form.get('get_token')):
+    app_config['SERVER']['DATABASE'] = request.form['server_database']
+    app_config['SERVER']['SCHEMA'] = request.form['server_schema']
+    app_config['SERVER']['SECRET_KEY'] = request.form['server_secret_key']
+    app_config['SERVER']['DEBUG'] = request.form['server_debug']
 
-        app_config['SERVER']['DATABASE'] = request.form['server_database']
-        app_config['SERVER']['SCHEMA'] = request.form['server_schema']
-        app_config['SERVER']['SECRET_KEY'] = request.form['server_secret_key']
-        app_config['SERVER']['DEBUG'] = request.form['server_debug']
+    app_config['APP']['SECURITY'] = request.form['app_security']
+    app_config['APP']['USERNAME'] = request.form['app_username']
+    app_config['APP']['PASSWORD'] = request.form['app_password']
 
-        app_config['APP']['SECURITY'] = request.form['app_security']
-        app_config['APP']['USERNAME'] = request.form['app_username']
-        app_config['APP']['PASSWORD'] = request.form['app_password']
+    app_config['SYNC']['SERVER'] = request.form['sync_server']
+    app_config['SYNC']['DELAY'] = request.form['sync_delay']
+    app_config['SYNC']['TOKEN'] = request.form['sync_token']
 
-        app_config['SYNC']['SERVER'] = request.form['sync_server']
-        app_config['SYNC']['PORT'] = request.form['sync_port']
-        app_config['SYNC']['TOKEN_URL'] = request.form['sync_token_url']
-        app_config['SYNC']['TEMPLATES_URL'] = request.form['sync_templates_url']
-        app_config['SYNC']['DELAY'] = request.form['sync_delay']
-        app_config['SYNC']['TOKEN'] = request.form['sync_token']
+    save_config_file()
 
-        save_config_file()
-
-        flash('Configuration was successfully saved')
-        return redirect(url_for('show_config'))
-
-    else:
-        server = app_config['SYNC']['SERVER']
-        port = app_config['SYNC']['PORT']
-        url = app_config['SYNC']['TOKEN_URL']
-        username = request.form['sync_username']
-        password = request.form['sync_password']
-
-        token = get_token(server, port, url, username, password)
-
-        if( token ):
-            app_config['SYNC']['TOKEN'] = token
-
-            save_config_file()
-
-            flash('Token was successfully saved')
-            return redirect(url_for('show_config'))
-        else:
-            flash('Error getting the token')
-            return redirect(url_for('show_config'))
+    flash('Configuration was successfully saved')
+    return redirect(url_for('show_config'))
 
 ########################################################################
 #                                                                      #
@@ -324,14 +287,14 @@ def login():
         else:
             session['logged_in'] = True
             flash('You were logged in')
-            return redirect(url_for('main'))
+            return redirect(url_for('index'))
     return render_template('login.html', error=error)
 
 @app.route('/admin/logout')
 def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
-    return redirect(url_for('main'))
+    return redirect(url_for('index'))
 
 ########################################################################
 #                                                                      #
@@ -367,7 +330,7 @@ def print_data(template_url, printer_name):
 
             if(template_object):
                 template = Template(template_object['text'])
-                text = template.render(data, copies=copies, datetime=datetime, timedelta=timedelta) + '\n'
+                text = template.render(data, copies=copies) + '\n'
                 app.logger.info('Rendered text: ' + text )
 
                 if(ticket_printer_object):
@@ -597,4 +560,4 @@ def delete_template():
 ########################################################################
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=app_config['SERVER']['DEBUG'] )
+    app.run(host='0.0.0.0', port=5002, debug=app_config['SERVER']['DEBUG'] )
