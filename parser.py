@@ -7,11 +7,14 @@ class TagParser(HTMLParser):
         self.printer = printer
         self.chars = int(chars)
         self.feed(stream)
+        self.tab = False
         
         # self._parse(stream, False, None, *args, **kwargs)
         # return self.tree.getDocument()
 
     def handle_starttag(self, tag, attrs):
+        print(tag, attrs)
+
         if(tag == "br"):
             self.printer.text("\n")
         if(tag == "cut"):
@@ -20,6 +23,8 @@ class TagParser(HTMLParser):
             self.printer.set(align="center")
             self.printer.text(( "-" * self.chars ) + "\n")
         if(tag == "text"):
+            self.tab = False
+
             align = "left"
             font = "a"
             text_type = 'normal'
@@ -33,7 +38,11 @@ class TagParser(HTMLParser):
             for attr in attrs:
                 if(attr[0] == "align"):
                     print("Alineacion: ", attr[1])
-                    align = attr[1]
+                    if not(attr[1] == 'tab'):
+                        align = attr[1]
+                    else:
+                        align = 'right'
+                        self.tab = True
 
                 if(attr[0] == "font"):
                     print("Fuente: ", attr[1])
@@ -112,8 +121,22 @@ class TagParser(HTMLParser):
         text = text.replace("ú", "u")
         text = text.replace("ü", "u")
         if(len(text) > 0):
+            if(self.tab):
+                colums = text.split('|')
+                # print(colums)
+
+                chars = 0
+                for col in colums:
+                    chars += len(col)
+
+                space = (self.chars - chars)//(len(colums)-1 if len(colums) > 0 else 1)
+                # print(space)
+
+                text = text.replace('|', ' '*space)
+
             print("Imprimir: ", text)
             self.printer.text(text)
+
 
     def handle_comment(self, data):
         #print("Comment  :", data)
