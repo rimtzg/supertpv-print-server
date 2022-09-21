@@ -1,1 +1,3 @@
 Create blueprints for print methods
+Check if printer route exist before sent to print
+Put width size in ticket printer config

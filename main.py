@@ -334,8 +334,11 @@ def print_data(template_url, printer_name):
                 app.logger.info('Rendered text: ' + text )
 
                 if(ticket_printer_object):
+                    app.logger.info(dict(ticket_printer_object))
+
                     printer = File(ticket_printer_object['route'])
                     parser = TagParser()
+
                     for x in range(copies):
                         parser.parse(printer, text, ticket_printer_object['chars'])
                         app.logger.info('Print copy no. ' + str(x) )
