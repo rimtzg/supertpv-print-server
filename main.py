@@ -1,3 +1,7 @@
+#SYSTEM
+import os
+from os.path import exists
+
 #GLOBALS
 from flask import Flask, render_template, g, request, session, flash, redirect, url_for, abort, jsonify
 from flask_httpauth import HTTPBasicAuth
@@ -9,7 +13,6 @@ import jinja2
 from jinja2 import Template
 
 import json
-import os
 import configparser
 from zebra import Zebra
 import requests
@@ -336,12 +339,13 @@ def print_data(template_url, printer_name):
                 if(ticket_printer_object):
                     app.logger.info(dict(ticket_printer_object))
 
-                    printer = File(ticket_printer_object['route'])
-                    parser = TagParser()
+                    if(exists(ticket_printer_object['route'])):
+                        printer = File(ticket_printer_object['route'])
+                        parser = TagParser()
 
-                    for x in range(copies):
-                        parser.parse(printer, text, ticket_printer_object['chars'])
-                        app.logger.info('Print copy no. ' + str(x) )
+                        for x in range(copies):
+                            parser.parse(printer, text, ticket_printer_object['chars'])
+                            app.logger.info('Print copy no. ' + str(x) )
 
                 if(label_printer_object):
                     printer = Zebra(label_printer_object['queue'])
