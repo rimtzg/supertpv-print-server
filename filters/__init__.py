@@ -72,7 +72,7 @@ def human_datetime_filter(date_to_parse):
     if(type(date_to_parse) is str):
         date_to_parse = datetime.fromisoformat(date_to_parse)
 
-    return date_to_parse.replace(tzinfo=utc).astimezone(timezone).strftime("%d %b %Y  %H:%M")
+    return date_to_parse.replace(tzinfo=utc).astimezone(timezone).strftime("%d %b %Y %H:%M")
 
 # @app.template_filter('numeric')
 def integer_filter(int_to_parse):
