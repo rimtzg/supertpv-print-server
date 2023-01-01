@@ -62,7 +62,7 @@ cors = CORS(app)
 auth = HTTPBasicAuth()
 app.secret_key = app_config['SERVER']['SECRET_KEY']
 
-TEMPLATE_TEXT = app_config['APP']['TEMPLATE_TEXT']
+TEMPLATE_TEXT = 'Test'
 
 logging.basicConfig(level=logging.DEBUG)
 

@@ -120,6 +120,10 @@ class TagParser(HTMLParser):
         text = text.replace("ó", "o")
         text = text.replace("ú", "u")
         text = text.replace("ü", "u")
+        text = text.replace("º", "o")
+        text = text.replace("ª", "a")
+        text = text.replace("Ñ", "N")
+
         if(len(text) > 0):
             if(self.tab):
                 colums = text.split('|')
