@@ -123,6 +123,12 @@ class TagParser(HTMLParser):
         text = text.replace("º", "o")
         text = text.replace("ª", "a")
         text = text.replace("Ñ", "N")
+        text = text.replace("Á", "A")
+        text = text.replace("É", "E")
+        text = text.replace("Í", "I")
+        text = text.replace("Ó", "O")
+        text = text.replace("Ú", "U")
+        text = text.replace("¢", "c")
 
         if(len(text) > 0):
             if(self.tab):
