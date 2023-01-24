@@ -53,7 +53,7 @@ else:
     DIRECTORY = str(Path.home())
 
 try:
-    DEBUG = app_config['APP']['DEBUG']
+    DEBUG = app_config['SERVER']['DEBUG']
 except:
     DEBUG = True
 
@@ -98,7 +98,7 @@ jinja2.filters.FILTERS['human_datetime'] = human_datetime_filter
 
 def connect_db():
     """Connects to the specific database."""
-    rv = sqlite3.connect( os.path.join( DIRECTORY, app_config['SERVER']['DATABASE'] ))
+    rv = sqlite3.connect( os.path.join( DIRECTORY, app_config['DATABASE']['FILE'] ))
     rv.row_factory = sqlite3.Row
     return rv
 
@@ -118,7 +118,7 @@ def close_db(error):
 
 def init_db():
     db = get_db()
-    with app.open_resource( app_config['SERVER']['SCHEMA'], mode='r') as f:
+    with app.open_resource( app_config['DATABASE']['SCHEMA'], mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
@@ -260,18 +260,18 @@ def save_config():
     if not session.get('logged_in'):
         abort(401)
 
-    app_config['SERVER']['DATABASE'] = request.form['server_database']
-    app_config['SERVER']['SCHEMA'] = request.form['server_schema']
+    app_config['DATABASE']['FILE'] = request.form['server_database']
+    app_config['DATABASE']['SCHEMA'] = request.form['server_schema']
+
     app_config['SERVER']['SECRET_KEY'] = request.form['server_secret_key']
     app_config['SERVER']['DEBUG'] = request.form['server_debug']
+    app_config['SERVER']['SECURITY'] = request.form['app_security']
+    app_config['SERVER']['USERNAME'] = request.form['app_username']
+    app_config['SERVER']['PASSWORD'] = request.form['app_password']
 
-    app_config['APP']['SECURITY'] = request.form['app_security']
-    app_config['APP']['USERNAME'] = request.form['app_username']
-    app_config['APP']['PASSWORD'] = request.form['app_password']
-
-    app_config['SYNC']['SERVER'] = request.form['sync_server']
-    app_config['SYNC']['DELAY'] = request.form['sync_delay']
-    app_config['SYNC']['TOKEN'] = request.form['sync_token']
+    app_config['API']['URL'] = request.form['api_url']
+    app_config['API']['DELAY'] = request.form['api_delay']
+    app_config['API']['TOKEN'] = request.form['api_token']
 
     save_config_file()
 
@@ -288,9 +288,9 @@ def save_config():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != app_config['APP']['USERNAME']:
+        if request.form['username'] != app_config['SERVER']['USERNAME']:
             error = 'Invalid username'
-        elif request.form['password'] != app_config['APP']['PASSWORD']:
+        elif request.form['password'] != app_config['SERVER']['PASSWORD']:
             error = 'Invalid password'
         else:
             session['logged_in'] = True

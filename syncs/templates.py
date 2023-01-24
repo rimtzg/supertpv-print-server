@@ -3,6 +3,7 @@ import requests
 import json
 from datetime import datetime
 from time import sleep
+import sqlite3
 
 # from flask_script import Server
 from bson.objectid import ObjectId
@@ -24,8 +25,8 @@ def sync_templates():
     
 class Templates():
     def get(self):
-        server = app_config['SYNC']['SERVER']
-        token = app_config['SYNC']['TOKEN']
+        server = app_config['API']['URL']
+        token = app_config['API']['TOKEN']
 
         if(token):
             url = '{}/templates'.format( server )

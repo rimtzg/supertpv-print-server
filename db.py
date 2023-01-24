@@ -11,7 +11,7 @@ else:
 
 def connect_db():
     """Connects to the specific database."""
-    rv = sqlite3.connect( os.path.join( DIRECTORY, app_config['SERVER']['DATABASE'] ))
+    rv = sqlite3.connect( os.path.join( DIRECTORY, app_config['DATABASE']['FILE'] ))
     rv.row_factory = sqlite3.Row
     return rv
 

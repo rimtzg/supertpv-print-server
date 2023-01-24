@@ -5,9 +5,9 @@
         <form action="{{ url_for('save_config') }}" method=POST class=save>
             <h3>Server</h3>
             <dt>Data Base:</dt>
-            <dd><input type=text size=40 name=server_database value={{ config.SERVER.DATABASE }}></dd>
+            <dd><input type=text size=40 name=server_database value={{ config.DATABASE.FILE }}></dd>
             <dt>Schema:</dt>
-            <dd><input type=text size=40 name=server_schema value={{ config.SERVER.SCHEMA }}></dd>
+            <dd><input type=text size=40 name=server_schema value={{ config.DATABASE.SCHEMA }}></dd>
             <dt>Debug:</dt>
             <dd>
                 <input type="radio" name="server_debug" value="true"
@@ -26,18 +26,18 @@
 
             <h3>Application</h3>
             <dt>Username:</dt>
-            <dd><input type=text size=40 name=app_username value={{ config.APP.USERNAME }}></dd>
+            <dd><input type=text size=40 name=app_username value={{ config.SERVER.USERNAME }}></dd>
             <dt>Password:</dt>
-            <dd><input type=password size=40 name=app_password value={{ config.APP.PASSWORD }}></dd>
+            <dd><input type=password size=40 name=app_password value={{ config.SERVER.PASSWORD }}></dd>
             <dt>Enable security:</dt>
             <dd>
                 <input type="radio" name="app_security" value="true"
-                    {% if config.APP.SECURITY == "true" %}
+                    {% if config.SERVER.SECURITY == "true" %}
                     {{ "checked" }}
                     {% endif %}
                 />Yes<br>
                 <input type="radio" name="app_security" value="false"
-                    {% if config.APP.SECURITY == "false" %}
+                    {% if config.SERVER.SECURITY == "false" %}
                     {{ "checked" }}
                     {% endif %}
                 />No<br>
@@ -45,11 +45,11 @@
 
             <h3>Synchronization</h3>
             <dt>Server:</dt>
-            <dd><input type=text size=40 name=sync_server value={{ config.SYNC.SERVER }}></dd>
+            <dd><input type=text size=40 name=api_url value={{ config.API.URL }}></dd>
             <dt>Token:</dt>
-            <dd><input type=text size=40 name=sync_token value={{ config.SYNC.TOKEN }}></dd>
+            <dd><input type=text size=40 name=api_token value={{ config.API.TOKEN }}></dd>
             <dt>Delay Time (seconds):</dt>
-            <dd><input type=number size=40 name=sync_delay value={{ config.SYNC.DELAY }}></dd>
+            <dd><input type=number size=40 name=api_delay value={{ config.API.DELAY }}></dd>
 
             <br />
             <input type=submit value=Save>
