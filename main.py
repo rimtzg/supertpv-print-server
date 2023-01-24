@@ -52,6 +52,11 @@ if(os.environ.get('SNAP_COMMON')):
 else:
     DIRECTORY = str(Path.home())
 
+try:
+    DEBUG = app_config['APP']['DEBUG']
+except:
+    DEBUG = True
+
 ########################################################################
 #                                                                      #
 #                                  INIT                                #
@@ -333,7 +338,7 @@ def print_data(template_url, printer_name):
 
             if(template_object):
                 template = Template(template_object['text'])
-                text = template.render(data, copies=copies) + '\n'
+                text = template.render(data)
                 app.logger.info('Rendered text: ' + text )
 
                 if(ticket_printer_object):
@@ -349,8 +354,14 @@ def print_data(template_url, printer_name):
 
                 if(label_printer_object):
                     printer = Zebra(label_printer_object['queue'])
-                    printer.setup(direct_thermal=label_printer_object['direct_thermal'])
+
+                    direct_thermal = label_printer_object['direct_thermal']
+                    label_height = (label_printer_object['height'], label_printer_object['gap'])
+                    label_width = label_printer_object['width']
+
+                    printer.setup(direct_thermal, label_height, label_width)
                     printer.output(text)
+                    printer.output("\nP{}\n".format(copies))
 
                 return MakeJson({"status": "Successfully printed"})
             else:
@@ -567,4 +578,4 @@ def delete_template():
 ########################################################################
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5002, debug=app_config['SERVER']['DEBUG'] )
+    app.run(host='0.0.0.0', port=5002, debug=DEBUG )

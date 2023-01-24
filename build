@@ -2,4 +2,5 @@
 
 snapcraft --debug &&
 snapcraft upload --release=edge supertpv-print-server_* &&
+snapcraft status supertpv-print-server
 rm supertpv-print-server_*

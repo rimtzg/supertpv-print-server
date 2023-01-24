@@ -23,6 +23,7 @@
 import os
 import os.path
 import sys
+import logging
 
 import shlex
 
@@ -56,10 +57,17 @@ class Zebra:
         file.close()
 
         command = 'lpr -l -#1 -C label -J label -T label -U usuario -H localhost:631 -P{} {}'.format(self.queue, FILE)
-        args = shlex.split(command)
-        print(args)
+        # args = shlex.split(command)
+        # print(args)
 
-        subprocess.run(command, shell=True, check=True)
+        result = None
+        try:
+            result = subprocess.run(command, shell=True, check=True, text=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+        except subprocess.CalledProcessError as e:
+            logging.error("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+
+        if(result):
+            logging.info(result)
         # p = subprocess.Popen(args, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # p.communicate(commands)
         # p.stdin.close()
@@ -150,6 +158,14 @@ class Zebra:
            commands += 'Q%s,%s\n'%(label_height[0],label_height[1])
         if label_width:
             commands += 'q%s\n'%label_width
+
+        #New document
+        commands += "N\n"
+        #Print direction
+        commands += "ZB\n"
+        #Density
+        commands += "D15\n"
+        
         self.output(commands)
 
     def reset_default(self):

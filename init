@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cp -n app_config.ini $HOME/app_config.ini
+
+python main.py

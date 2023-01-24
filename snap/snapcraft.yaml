@@ -1,6 +1,6 @@
 name: supertpv-print-server
 base: core20
-version: '1.5.5'
+version: '1.6.5'
 summary: Print Server for SuperTPV
 description: |
   Print Server for SuperTPV
@@ -22,10 +22,19 @@ parts:
     plugin: python
     source: .
     requirements: [requirements.txt]
+    stage:
+      - -app/env/.Python
+      - -app/env/bin/python
+      - -app/env/bin/python3
+      - -app/env/bin/python3.9
     stage-packages:
       - libpython3.9-stdlib
       - libpython3.9-minimal
       - python3.9-minimal
+      - zlib1g
+      - zlib1g-dev
+      - libjpeg-dev
+      - cups-bsd
     build-environment:
       - PYTHONPATH: $SNAPCRAFT_PART_INSTALL/lib/python3/dist-packages:$PYTHONPATH
     override-build: |
