@@ -118,7 +118,7 @@ def close_db(error):
 
 def init_db():
     db = get_db()
-    with app.open_resource( app_config['DATABASE']['SCHEMA'], mode='r') as f:
+    with app.open_resource( 'schemas.sql', mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 
