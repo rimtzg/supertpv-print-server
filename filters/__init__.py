@@ -75,29 +75,29 @@ def human_datetime_filter(date_to_parse):
     return date_to_parse.replace(tzinfo=utc).astimezone(timezone).strftime("%d %b %Y %H:%M")
 
 # @app.template_filter('numeric')
-def integer_filter(int_to_parse):
-    if not (int_to_parse):
-        int_to_parse = 0
+def integer_filter(int_to_parse = 0):
+    if(isinstance(int_to_parse, str)):
+        int_to_parse = float(int_to_parse)
 
     return "{:,.0f}".format( int_to_parse )
 
-def numeric_filter(float_to_parse):
-    if not (float_to_parse):
-        float_to_parse = 0
+def numeric_filter(float_to_parse = 0):
+    if(isinstance(float_to_parse, str)):
+        float_to_parse = float(float_to_parse)
 
     return "{:,.2f}".format( float_to_parse )
 
 # @app.template_filter('currency')
-def currency_filter(float_to_parse):
-    if not (float_to_parse):
-        float_to_parse = 0
+def currency_filter(float_to_parse = 0):
+    if(isinstance(float_to_parse, str)):
+        float_to_parse = float(float_to_parse)
 
     return "$ {:,.2f}".format( float_to_parse )
 
 # @app.template_filter('percent')
-def percent_filter(float_to_parse):
-    if not (float_to_parse):
-        float_to_parse = 0
+def percent_filter(float_to_parse = 0):
+    if(isinstance(float_to_parse, str)):
+        float_to_parse = float(float_to_parse)
         
     return "{:,.0f} %".format( float_to_parse )
 
