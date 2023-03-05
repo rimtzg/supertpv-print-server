@@ -17,6 +17,18 @@ def humanize_date(date_to_parse):
 
     return humanize.naturaltime(date_to_parse)
 
+def lote_filter(date_to_parse):
+    utc = pytz.utc
+    timezone = pytz.timezone('America/Mexico_City')
+
+    if not(date_to_parse):
+        date_to_parse = datetime.utcnow()
+
+    if(type(date_to_parse) is str):
+        date_to_parse = datetime.fromisoformat(date_to_parse)
+
+    return date_to_parse.replace(tzinfo=utc).astimezone(timezone).strftime('%y%m%d')
+
 # @app.template_filter('date')
 def date_filter(date_to_parse):
     utc = pytz.utc

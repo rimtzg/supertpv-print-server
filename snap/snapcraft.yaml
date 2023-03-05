@@ -1,6 +1,6 @@
 name: supertpv-print-server
 base: core20
-version: '1.6.8'
+version: '1.7.4'
 summary: Print Server for SuperTPV
 description: |
   Print Server for SuperTPV

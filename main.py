@@ -25,6 +25,7 @@ from datetime import datetime, date, timedelta
 
 #LOCALS
 from parser import TagParser
+from parser import LabelParser
 from config import app_config, save_config_file
 
 #Import FILTERS
@@ -41,6 +42,7 @@ from filters import to_object_id_filter
 from filters import calendar_filter
 from filters import humanize_date
 from filters import human_datetime_filter
+from filters import lote_filter
 
 ########################################################################
 #                                                                      #
@@ -89,6 +91,7 @@ jinja2.filters.FILTERS['integer'] = integer_filter
 jinja2.filters.FILTERS['calendar'] = calendar_filter
 jinja2.filters.FILTERS['humanize'] = humanize_date
 jinja2.filters.FILTERS['human_datetime'] = human_datetime_filter
+jinja2.filters.FILTERS['lote'] = lote_filter
 
 ########################################################################
 #                                                                      #
@@ -180,10 +183,8 @@ from syncs import sync_templates
 
 @app.before_first_request
 def first_start():
-    #if not (os.path.isfile( app.conf['DATABASE'] )):
     init_db()
-    # start_sync()
-    #start_sync()
+
     thread = threading.Thread(target=sync_templates)
     thread.start()
 
@@ -355,11 +356,23 @@ def print_data(template_url, printer_name):
                 if(label_printer_object):
                     printer = Zebra(label_printer_object['queue'])
 
+                    # parser = LabelParser(label_printer_object['width'], label_printer_object['height']) #width, #height
+                    # label = parser.parse(text)
+
+                    # label.preview()
+
+                    # printer.setup()
+                    # for x in range(copies):
+                    #     printer.output(label)
+                    #     app.logger.info('Print copy no. ' + str(x+1) )
+
                     direct_thermal = label_printer_object['direct_thermal']
                     label_height = (label_printer_object['height'], label_printer_object['gap'])
                     label_width = label_printer_object['width']
 
                     printer.setup(direct_thermal, label_height, label_width)
+                    # printer.setup()
+                    printer.output("N\n")
                     printer.output(text)
                     printer.output("\nP{}\n".format(copies))
 

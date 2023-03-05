@@ -1,6 +1,87 @@
 from html.parser import HTMLParser
+import zpl
+import logging
 
-#Printer = printer.File("/dev/usb/lp1")
+class LabelParser(HTMLParser):
+    def __init__(self, width, height):
+        super().__init__()
+        self.width = width
+        self.height = height
+
+        self.set_default()
+
+    def set_default(self):
+        self.type = None
+        self.pos_x = 0
+        self.pos_y = 0
+        self.char_height = 10
+        self.char_width = 10
+        self.align = 'L'
+        self.font = '0'
+        self.barcode_type = 'C'
+
+    def parse(self, stream, *args, **kwargs):
+        self.label = zpl.Label(self.height, self.width)
+        self.feed(stream)
+        
+        return self.label.dumpZPL()
+
+    def handle_starttag(self, tag, attrs):
+        print(tag, attrs)
+
+        self.type = tag
+        
+        for attr in attrs:
+            if(attr[0] == "x"):
+                self.pos_x = float(attr[1])
+            if(attr[0] == "y"):
+                self.pos_y = float(attr[1])
+            if(attr[0] == "height"):
+                self.char_height = float(attr[1])
+            if(attr[0] == "width"):
+                self.char_width = float(attr[1])
+            if(attr[0] == "align"):
+                if(attr[1] == "center"):
+                    self.align = "C"
+                if(attr[1] == "left"):
+                    self.align = "L"
+                if(attr[1] == "right"):
+                    self.align = "R"
+            if(attr[0] == "type"):
+                if(attr[1] == "a"):
+                    self.font = '0'
+                if(attr[1] == "b"):
+                    self.font = '1'
+
+    def handle_endtag(self, tag):
+        self.set_default()
+        
+        pass
+
+    def handle_data(self, text):
+        self.label.origin(self.pos_x, self.pos_y)
+
+        if(self.type == "text"):
+            self.label.write_text(text, char_height=self.char_height, char_width=self.char_width, line_width=self.width, justification=self.align, font=self.font)
+
+        if(self.type == "barcode"):
+            # self.label.barcode(height=int(self.char_height), barcode_type=self.barcode_type, print_interpretation_line='N', print_interpretation_line_above='Y', check_digit='N', mode='N', magnification=2)
+            self.label.field_orientation('N', '0')
+            self.label.barcode(self.barcode_type, text, height=int(self.char_height), print_interpretation_line='N', print_interpretation_line_above='Y')
+
+        self.label.endorigin()
+
+    def handle_comment(self, data):
+        pass
+
+    def handle_entityref(self, name):
+        pass
+
+    def handle_charref(self, name):
+        pass
+
+    def handle_decl(self, data):
+        pass
 
 class TagParser(HTMLParser):
     def parse(self, printer, stream, chars, *args, **kwargs):

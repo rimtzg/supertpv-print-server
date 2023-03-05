@@ -158,14 +158,6 @@ class Zebra:
            commands += 'Q%s,%s\n'%(label_height[0],label_height[1])
         if label_width:
             commands += 'q%s\n'%label_width
-
-        #New document
-        commands += "N\n"
-        #Print direction
-        commands += "ZB\n"
-        #Density
-        commands += "D15\n"
-        
         self.output(commands)
 
     def reset_default(self):
