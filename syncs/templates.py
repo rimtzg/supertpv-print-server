@@ -17,11 +17,12 @@ def sync_templates():
     logging.info('START SYNC TEMPLATES')
 
     templates = Templates()
+    templates.get()
 
-    while True:
-        templates.get()
+    # while True:
+    #     templates.get()
 
-        sleep(120)
+    #     sleep(120)
     
 class Templates():
     def get(self):
@@ -29,10 +30,10 @@ class Templates():
         token = app_config['API']['TOKEN']
 
         if(token):
-            url = '{}/templates'.format( server )
+            url = '{}/templates/list'.format( server )
 
             headers = {
-                'Token' : token
+                'Authorization' : f"Bearer {token}"
             }
 
             response = None

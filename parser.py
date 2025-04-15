@@ -220,8 +220,10 @@ class TagParser(HTMLParser):
                 for col in colums:
                     chars += len(col)
 
-                space = (self.chars - chars)//(len(colums)-1 if len(colums) > 0 else 1)
-                # print(space)
+                try:
+                    space = (self.chars - chars)//(len(colums)-1)
+                except:
+                    space = 1
 
                 text = text.replace('|', ' '*space)
 
