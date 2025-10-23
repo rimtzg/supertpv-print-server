@@ -1,0 +1,42 @@
+name: 🚀 Publicación Manual de Snap
+
+on:
+  # Permite que el workflow se ejecute manualmente desde la pestaña "Actions" de GitHub
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Canal de Snap Store (ej: edge, beta, candidate, stable)'
+        required: true
+        default: 'edge'
+
+jobs:
+  build_and_publish:
+    # Este trabajo se ejecutará en el último Ubuntu disponible
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout del código
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------
+      # 1. Construir el Snap
+      # ----------------------------------------------------
+      - name: 🏗️ Construir el Snap
+        # Usa la acción oficial para construir el snap
+        uses: snapcore/action-build@v1
+        id: build-snap
+
+      # ----------------------------------------------------
+      # 2. Publicar en la Snap Store
+      # ----------------------------------------------------
+      - name: 📤 Publicar en la Snap Store
+        # Usa la acción oficial para autenticarse y publicar
+        uses: snapcore/action-publish@v1
+        env:
+          # Variable de entorno requerida para la autenticación
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
+        with:
+          # Ruta al archivo .snap construido en el paso anterior
+          snap: ${{ steps.build-snap.outputs.snap }}
+          # Canal de destino, tomado de la entrada manual del workflow
+          release: ${{ github.event.inputs.channel }}

@@ -96,6 +96,32 @@ class TagParser(HTMLParser):
     def handle_starttag(self, tag, attrs):
         print(tag, attrs)
 
+        if(tag == "qr"):
+            text = ""
+            size = 10
+            level = "L"
+            mode = "N"
+            invert = False
+            smooth = False
+            flip = False
+
+            for attr in attrs:
+                if(attr[0] == "text"):
+                    text = attr[1]
+                if(attr[0] == "size"):
+                    size = attr[1]
+                if(attr[0] == "level"):
+                    level = attr[1]
+                if(attr[0] == "mode"):
+                    mode = attr[1]
+                if(attr[0] == "invert"):
+                    invert = attr[1]
+                if(attr[0] == "smooth"):
+                    smooth = attr[1]
+                if(attr[0] == "flip"):
+                    flip = attr[1]
+                    
+            self.printer.qr(text, size=size, level=level, mode=mode, invert=invert, smooth=smooth, flip=flip)
         if(tag == "br"):
             self.printer.text("\n")
         if(tag == "cut"):
