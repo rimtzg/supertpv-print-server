@@ -5,6 +5,6 @@ set -e
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
-cp -n $SNAP/app/app_config.ini $SNAP_COMMON/app_config.ini
+cp --update=none $SNAP/app_config.ini $SNAP_COMMON/app_config.ini
 
-exec "$SNAP/bin/gunicorn" --chdir "$SNAP/app" --bind 0.0.0.0:5000 main:app "$@" -t 240 --worker-class eventlet
+exec "$SNAP/bin/gunicorn" --chdir "$SNAP" --bind 0.0.0.0:5000 main:app "$@" -t 240

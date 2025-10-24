@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cp -n app_config.ini $HOME/app_config.ini
+cp --update=none app/app_config.ini $HOME/app_config.ini
 
-python main.py
+python app/main.py

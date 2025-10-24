@@ -1,4 +1,5 @@
 from html.parser import HTMLParser
+from jinja2 import is_undefined
 import zpl
 import logging
 
@@ -98,30 +99,40 @@ class TagParser(HTMLParser):
 
         if(tag == "qr"):
             text = ""
+            ec = 0
             size = 10
-            level = "L"
-            mode = "N"
-            invert = False
-            smooth = False
-            flip = False
+            model = 2
+            native = True
+            center = False
+            impl = None
+            image_arguments = None
 
             for attr in attrs:
                 if(attr[0] == "text"):
                     text = attr[1]
                 if(attr[0] == "size"):
-                    size = attr[1]
-                if(attr[0] == "level"):
-                    level = attr[1]
-                if(attr[0] == "mode"):
-                    mode = attr[1]
-                if(attr[0] == "invert"):
-                    invert = attr[1]
-                if(attr[0] == "smooth"):
-                    smooth = attr[1]
-                if(attr[0] == "flip"):
-                    flip = attr[1]
-                    
-            self.printer.qr(text, size=size, level=level, mode=mode, invert=invert, smooth=smooth, flip=flip)
+                    size = int(attr[1])
+                if(attr[0] == "ec"):
+                    ec = int(attr[1])
+                if(attr[0] == "model"):
+                    model = int(attr[1])
+                if(attr[0] == "native"):
+                    if(attr[1] == "true"):
+                        native = True
+                        center = False
+                    else:
+                        native = False
+                if(attr[0] == "center"):
+                    if(attr[1] == "true"):
+                        if native:
+                            center = False
+                        else:
+                            center = True
+                    else:
+                        center = False
+                        
+            self.printer.qr(text, ec=ec, size=size, model=model, native=native, center=center, impl=impl, image_arguments=image_arguments)
+        
         if(tag == "br"):
             self.printer.text("\n")
         if(tag == "cut"):
@@ -134,10 +145,15 @@ class TagParser(HTMLParser):
 
             align = "left"
             font = "a"
-            text_type = 'normal'
+            is_bold = False
+            is_underline = False
+            normal_textsize = True
+            double_height = False
+            double_width = False
+            custom_size = False
             width = 1
             height = 1
-            density = 9
+            density = 8
             invert = False
             smooth=False
             flip=False
@@ -157,11 +173,15 @@ class TagParser(HTMLParser):
 
                 if(attr[0] == "type"):
                     print("Tipo de texto: ", attr[1])
-                    text_type = attr[1]
+                    if(attr[1] == "bold"):
+                        is_bold = True
 
                 if(attr[0] == "underline"):
                     print("Subrayado: ", attr[1])
-                    underline = attr[1]
+                    if(attr[1] == "true"):
+                        is_underline = True
+                    else:
+                        is_underline = False
 
                 if(attr[0] == "width"):
                     print("Anchura: ", attr[1])
@@ -170,6 +190,7 @@ class TagParser(HTMLParser):
                     except:
                         data = 1
                     width = data
+                    custom_size = True
 
                 if(attr[0] == "height"):
                     print("Altura: ", attr[1])
@@ -178,6 +199,7 @@ class TagParser(HTMLParser):
                     except:
                         data = 1
                     height = data
+                    custom_size = True
 
                 if(attr[0] == "density"):
                     print("Densidad: ", attr[1])
@@ -211,7 +233,7 @@ class TagParser(HTMLParser):
                         data = False
                     flip = data
 
-            self.printer.set(align=align, font=font, text_type=text_type, width=width, height=height, density=density, invert=invert, smooth=smooth, flip=flip)
+            self.printer.set(align=align, font=font, bold=is_bold, underline=is_underline, normal_textsize=normal_textsize, double_height=double_height, double_width=double_width, custom_size=custom_size, width=width, height=height, density=density, invert=invert, smooth=smooth, flip=flip)
 
     def handle_endtag(self, tag):
         #print("End tag  :", tag)

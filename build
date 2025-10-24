@@ -1,7 +1,11 @@
 #!/bin/bash
 
-rm -R -f env/bin/python* &&
-snapcraft --debug &&
+export SNAPCRAFT_BUILD_ENVIRONMENT_CPUS=12
+export SNAPCRAFT_BUILD_ENVIRONMENT_MEMORY=24G
+
+snapcraft clean &&
+snapcraft remote-build --launchpad-accept-public-upload --verbosity=debug &&
 snapcraft upload --release=edge supertpv-print-server_* &&
-snapcraft status supertpv-print-server
+snapcraft status supertpv-print-server &&
+rm snapcraft-supertpv-print-server-*
 rm supertpv-print-server_*

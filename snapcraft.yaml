@@ -1,0 +1,50 @@
+name: supertpv-print-server
+base: core24
+version: '2.0.3'
+summary: Print Server for SuperTPV
+description: |
+  Print Server for SuperTPV
+
+grade: stable
+confinement: strict
+platforms:
+    amd64:
+        build-on: [amd64, arm64]
+        build-for: [amd64]
+
+apps:
+  supertpv-print-server:
+    command: wrappers/run
+    daemon: simple
+    plugs: [network, network-bind, raw-usb, cups-control, process-control]
+    environment:
+      PYTHONPATH: $SNAP/lib/python3/dist-packages
+
+parts:
+  supertpv-print-server:
+    plugin: python
+    source: .
+    python-requirements:
+      - requirements.txt
+    stage:
+      - -env
+    build-packages:
+      - libjpeg-dev
+      - zlib1g-dev
+      - libpng-dev
+      - liblcms2-dev
+      - libwebp-dev
+    stage-packages:
+      - libjpeg-turbo8  # Runtime para JPEG
+      - zlib1g          # Runtime para ZLIB
+      - libpng16-16     # Runtime para PNG
+      - liblcms2-2      # Runtime para gestión de color
+      - libwebp7        # Runtime para WebP
+
+  wrappers:
+    plugin: dump
+    source: snap_wrap/
+
+  app:
+    plugin: dump
+    source: app/

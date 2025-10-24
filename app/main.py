@@ -181,14 +181,25 @@ def get_token(server=None, port=None, url=None, username=None, password=None):
 
 from syncs import sync_templates
 
-@app.before_first_request
-def first_start():
-    init_db()
+# @app.before_first_request
+# def first_start():
+#     init_db()
 
-    thread = threading.Thread(target=sync_templates)
-    thread.start()
+#     thread = threading.Thread(target=sync_templates)
+#     thread.start()
 
-    pass
+#     pass
+
+@app.before_request
+def run_once_setup():
+    if not getattr(g, 'first_request_done', False):
+        app.logger.info('Running first request sync')
+        # Your setup code here
+        g.first_request_done = True
+        init_db()
+
+        thread = threading.Thread(target=sync_templates)
+        thread.start()
 
 ########################################################################
 #                                                                      #
@@ -352,6 +363,8 @@ def print_data(template_url, printer_name):
                         for x in range(copies):
                             parser.parse(printer, text, ticket_printer_object['chars'])
                             app.logger.info('Print copy no. ' + str(x) )
+
+                        printer.close()
 
                 if(label_printer_object):
                     printer = Zebra(label_printer_object['queue'])
