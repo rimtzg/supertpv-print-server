@@ -1,5 +1,7 @@
 #SYSTEM
 import os
+import sys
+import subprocess
 from os.path import exists
 
 #GLOBALS
@@ -403,6 +405,103 @@ def print_data(template_url, printer_name):
 #                                                                      #
 ########################################################################
 
+@app.route('/printers', methods=['GET', 'POST'])
+def list_all_printers():
+    db = get_db()
+    cur = db.execute('select * from ticket_printers order by id desc')
+    results = cur.fetchall()
+    printers = []
+    
+    if '--develpment' in sys.argv or '--development' in sys.argv:
+        printers.append({
+            "id": 999,
+            "name": "Dummy Printer",
+            "route": "dummy_route",
+            "chars": 32,
+            "uri": "/tmp/printer",
+            "type": "ticket"
+        })
+    for result in results:
+        printer = {}
+        printer["id"] = result["id"]
+        printer["name"] = result["name"]
+        printer["route"] = result["route"]
+        printer["chars"] = int(result["chars"])
+        printer["uri"] = result["uri"]
+        printer["type"] = "ticket"
+        printers.append(printer)
+        
+    cur = db.execute('select * from label_printers order by id desc')
+    results = cur.fetchall()
+    for result in results:
+        printer = {}
+        printer["id"] = result["id"]
+        printer["name"] = result["name"]
+        printer["queue"] = result["queue"]
+        printer["width"] = int(result["width"])
+        printer["height"] = int(result["height"])
+        printer["gap"] = int(result["gap"])
+        printer["type"] = "label"
+        if (result["direct_thermal"] == "true"):
+            printer["direct_thermal"] = True
+        else:
+            printer["direct_thermal"] = False
+        printer["uri"] = result["uri"]
+        printers.append(printer)
+        
+    return MakeJson(printers)
+
+@app.route('/printers/system-devices', methods=['GET'])
+def get_system_devices():
+    if '--develpment' in sys.argv or '--development' in sys.argv:
+        return MakeJson(["/tmp/printer"])
+    try:
+        process = subprocess.run("ls /dev/usb/lp*", shell=True, capture_output=True, text=True)
+        if process.returncode == 0:
+            devices = [line.strip() for line in process.stdout.split('\n') if line.strip()]
+        else:
+            devices = []
+    except Exception as e:
+        devices = []
+    return MakeJson(devices)
+
+@app.route('/printers/add', methods=['POST'])
+def api_add_printer():
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            data = request.form
+        
+        printer_type = data.get('type', 'ticket')
+        name = data.get('name')
+        if not name:
+            return MakeJson({"error": "Name is required"}), 400
+            
+        db = get_db()
+        if printer_type == 'ticket':
+            route = data.get('route', '')
+            chars = int(data.get('chars', 32))
+            uri = name.replace(' ', '').lower()
+            db.execute('insert into ticket_printers (name, route, chars, uri) values (?, ?, ?, ?)',
+                       [name, route, chars, uri])
+            db.commit()
+            return MakeJson({"success": True, "message": "Printer added successfully"})
+        elif printer_type == 'label':
+            queue = data.get('queue', '')
+            width = int(data.get('width', 80))
+            height = int(data.get('height', 80))
+            gap = int(data.get('gap', 2))
+            direct_thermal = 'true' if data.get('direct_thermal') else 'false'
+            uri = name.replace(' ', '').lower()
+            db.execute('insert into label_printers (name, queue, width, height, gap, direct_thermal, uri) values (?, ?, ?, ?, ?, ?, ?)',
+                       [name, queue, width, height, gap, direct_thermal, uri])
+            db.commit()
+            return MakeJson({"success": True, "message": "Label printer added successfully"})
+        else:
+            return MakeJson({"error": "Invalid printer type"}), 400
+    except Exception as e:
+        return MakeJson({"error": str(e)}), 500
+
 @app.route('/printers/ticket/list', methods=['GET', 'POST'])
 def list_ticket_printers():
     db = get_db()
@@ -557,8 +656,30 @@ def delete_label_printer():
 #                                                                      #
 ########################################################################
 
-@app.route('/templates')
+@app.route('/templates', methods=['GET', 'POST'])
 def show_templates():
+    if request.method == 'POST':
+        try:
+            data = request.get_json(silent=True)
+            if not data:
+                return MakeJson({"error": "No data received"}), 400
+                
+            if isinstance(data, dict):
+                templates = [data]
+            elif isinstance(data, list):
+                templates = data
+            else:
+                return MakeJson({"error": "Invalid format"}), 400
+                
+            db = get_db()
+            sql = 'replace into templates (name, text, url) values (?, ?, ?)'
+            for template in templates:
+                db.execute(sql, [template.get('name'), template.get('text'), template.get('url')])
+            db.commit()
+            return MakeJson({"success": True, "message": f"Successfully synced {len(templates)} templates"})
+        except Exception as e:
+            return MakeJson({"error": str(e)}), 500
+
     db = get_db()
     cur = db.execute('select id, name, url, text from templates order by id desc')
     templates = cur.fetchall()
