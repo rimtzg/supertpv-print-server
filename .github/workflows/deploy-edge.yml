@@ -18,17 +18,7 @@ jobs:
       - name: Install Snapcraft
         run: sudo snap install snapcraft --classic
 
-      - name: Setup LXD
-        run: |
-          sudo snap install lxd
-          sudo lxd init --auto
-          sudo usermod -a -G lxd $USER
-
-      - name: Build Snap
-        run: sg lxd -c 'snapcraft --use-lxd'
-
-      - name: Publish to Edge
+      - name: Build and Publish to Edge
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPSTORE_TOKEN }}
-        run: |
-          snapcraft upload --release=edge *.snap
+        run: ./build
