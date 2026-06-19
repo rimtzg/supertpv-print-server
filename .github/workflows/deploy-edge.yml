@@ -15,10 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Snapcraft
-        run: sudo snap install snapcraft --classic
+      - name: Build Snap
+        uses: snapcore/action-build@v1
+        id: build
 
-      - name: Build and Publish to Edge
+      - name: Publish to Edge
+        uses: snapcore/action-publish@v1
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPSTORE_TOKEN }}
-        run: ./build
+        with:
+          store_login: ${{ secrets.SNAPSTORE_TOKEN }}
+          snap: ${{ steps.build.outputs.snap }}
+          release: edge
