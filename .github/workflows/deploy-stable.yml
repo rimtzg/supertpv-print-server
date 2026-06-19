@@ -1,0 +1,21 @@
+name: Release Stable on Snapcraft
+
+on:
+  workflow_dispatch:
+
+env:
+  CI: false
+
+jobs:
+  release-stable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Snapcraft
+        run: sudo snap install snapcraft --classic
+
+      - name: Release to Stable
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPSTORE_TOKEN }}
+        run: ./release
